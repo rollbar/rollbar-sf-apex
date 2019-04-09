@@ -1,0 +1,1 @@
+public class RollbarNotInitializedException extends Exception {}
