@@ -60,14 +60,38 @@ public with sharing class DataBuilder {
 
         Map<String, Object> traceMap = new Map<String, Object>();
 
-        List<Map<String, Object>> frames = new List<Map<String, Object>>();
+        List<Map<String, Object>> framesList = new List<Map<String, Object>>();
+
+        String[] frames = exc.getStackTraceString().split('\n');
+        for (String frameStr : frames) {
+            if (frameStr == '()') {
+                continue;
+            }
+
+            Map<String, Object> frameMap = new Map<String, Object>();
+            frameMap.put('filename', frameStr);
+            frameMap.put('class_name', frameStr.split(':')[0].split('\\.')[1]);
+            frameMap.put('method', frameStr.split(':')[0].split('\\.')[2]);
+
+            Pattern linePattern = Pattern.compile('line (\\d+)');
+            Matcher lineMatcher = linePattern.matcher(frameStr);
+            lineMatcher.find();
+            frameMap.put('lineno', Integer.valueOf(lineMatcher.group(1)));
+
+            Pattern colPattern = Pattern.compile('column (\\d+)');
+            Matcher colMatcher = colPattern.matcher(frameStr);
+            colMatcher.find();
+            frameMap.put('colno', Integer.valueOf(colMatcher.group(1)));
+
+            framesList.add(frameMap);
+        }
 
         Map<String, Object> excMap = new Map<String, Object>();
         excMap.put('class', exc.getTypeName());
         excMap.put('message', exc.getMessage());
 
         traceMap.put('exception', excMap);
-        traceMap.put('frames', frames);
+        traceMap.put('frames', framesList);
         body.put('trace', traceMap);
 
         return body;
