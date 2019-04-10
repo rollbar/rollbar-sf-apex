@@ -1,7 +1,7 @@
 @isTest
 public class NotifierTest {
     @isTest
-    public static void testLog(){
+    public static void testLogMessage(){
         Test.setMock(HttpCalloutMock.class, new RollbarApiCalloutMock());
 
         Config config = new Config('foo', 'bar');
@@ -9,6 +9,33 @@ public class NotifierTest {
         Notifier subject = new Notifier(config);
 
         HttpResponse response = subject.log('info', 'Message from the Apex SDK');
+
+        System.assertEquals(200, response.getStatusCode());
+        
+        JSONParser parser = JSON.createParser(response.getBody());
+        Integer err = null;
+        while (parser.nextToken() != null) {
+            if ((parser.getCurrentToken() == JSONToken.FIELD_NAME) && 
+                (parser.getText() == 'err')) {
+                parser.nextToken();
+                err = parser.getIntegerValue();
+            }
+        }
+
+        System.assertEquals(0, err);
+    }
+
+    @isTest
+    public static void testLogException(){
+        Test.setMock(HttpCalloutMock.class, new RollbarApiCalloutMock());
+
+        Config config = new Config('foo', 'bar');
+
+        Notifier subject = new Notifier(config);
+
+        DataBuilderTestException exc = new DataBuilderTestException();
+
+        HttpResponse response = subject.log(exc);
 
         System.assertEquals(200, response.getStatusCode());
         

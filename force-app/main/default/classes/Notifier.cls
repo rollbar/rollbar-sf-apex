@@ -1,15 +1,29 @@
-public with sharing class Notifier {
+public with sharing class Notifier
+{
 
-    public Notifier(Config config) {
+    public Notifier(Config config)
+    {
         this.config = config;
+        this.dataBuilder = new DataBuilder(this.config);
     }
 
-    public HttpResponse log(String level, String message) {
+    public HttpResponse log(String level, String message)
+    {
+        String payload = JSON.serialize(this.dataBuilder.buildPayload(level, message));
+        return reportPayload(payload);
+    }
+
+    public HttpResponse log(Exception exc)
+    {
+        String payload = JSON.serialize(this.dataBuilder.buildPayload(exc));
+        return reportPayload(payload);
+    }
+
+    private HttpResponse reportPayload(String payload)
+    {
         HttpRequest request = new HttpRequest();
         request.setEndpoint(this.config.endpoint());
         request.setMethod('POST');
-
-        String payload = this.buildPayload(level, message); 
         request.setBody(payload);
 
         System.debug(payload);
@@ -22,20 +36,6 @@ public with sharing class Notifier {
         return response;
     }
 
-    private String buildPayload(String level, String message) {
-        return '{'+
-            '"access_token":"'+this.config.accessToken()+'",'+
-            '"data":{'+
-                '"environment":"development",'+
-                '"body":{'+
-                    '"message":{'+
-                        '"body":"'+message+'"'+
-                    '}'+
-                '},'+
-                '"level":"'+level+'"'+
-            '}'+
-        '}';
-    }
-
-    private Config config = null;
+    private Config config;
+    private DataBuilder dataBuilder;
 }
