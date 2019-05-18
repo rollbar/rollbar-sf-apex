@@ -10,6 +10,12 @@ public class DataBuilderTest
         Map<String, Object> result = subject.buildPayload('info', expected);
 
         Map<String, Object> data = (Map<String, Object>)result.get('data');
+            
+        Map<String, Object> notifierMap = (Map<String, Object>)data.get('notifier');
+
+        System.assertEquals(Notifier.NAME, (String)notifierMap.get('name'));
+        System.assertEquals(Notifier.VERSION, (String)notifierMap.get('version'));
+
         Map<String, Object> body = (Map<String, Object>)data.get('body');
 
         System.assertEquals(expected, ((Map<String, Object>)body.get('message')).get('body'));
@@ -30,6 +36,11 @@ public class DataBuilderTest
             Map<String, Object> result = subject.buildPayload(exc);
 
             Map<String, Object> data = (Map<String, Object>)result.get('data');
+
+            Map<String, Object> notifierMap = (Map<String, Object>)data.get('notifier');
+            System.assertEquals(Notifier.NAME, (String)notifierMap.get('name'));
+            System.assertEquals(Notifier.VERSION, (String)notifierMap.get('version'));
+
             Map<String, Object> body = (Map<String, Object>)data.get('body');
             Map<String, Object> trace = (Map<String, Object>)body.get('trace');
             Map<String, Object> excMap = (Map<String, Object>)trace.get('exception');
@@ -42,5 +53,51 @@ public class DataBuilderTest
             // Not sure if it's possible at all.
             // Map<String, Object> frame = ((List<Map<String, Object>>)trace.get('frames'))[0];
         }
+    }
+
+    @isTest
+    static void testBuildExceptionDataPayload()
+    {
+        DataBuilder subject = new DataBuilder(new Config('foo', 'bar'));
+
+        Map<String, Object> expected = new Map<String, Object>();
+        expected.put('environment', 'Sandbox');
+        expected.put('organization', 'TestOrg');
+        expected.put('className', 'TestClass');
+        expected.put('message', 'Test exception message');
+        expected.put('fileName', 'Class.ClassWithExceptionThrown.someMethod');
+        expected.put('context', 'Exception context');
+        expected.put('line', 14);
+        expected.put('column', 12);
+        
+        ExceptionData exData = ExceptionData.fromMap(expected);
+
+        Map<String, Object> result = subject.buildPayload(exData);
+
+        Map<String, Object> data = (Map<String, Object>)result.get('data');
+
+        Map<String, Object> custom = (Map<String, Object>)data.get('custom');
+
+        System.assertEquals((String)expected.get('context'), (String)custom.get('context'));
+            
+        Map<String, Object> notifierMap = (Map<String, Object>)data.get('notifier');
+        System.assertEquals(Notifier.NAME, (String)notifierMap.get('name'));
+        System.assertEquals(Notifier.VERSION, (String)notifierMap.get('version'));
+
+        Map<String, Object> body = (Map<String, Object>)data.get('body');
+        Map<String, Object> trace = (Map<String, Object>)body.get('trace');
+
+        Map<String, Object> excMap = (Map<String, Object>)trace.get('exception');
+
+        System.assertEquals(expected.get('message'), excMap.get('message'));
+        System.assertEquals(expected.get('className'), excMap.get('class'));
+
+        Map<String, Object> frameMap = ((List<Map<String, Object>>)trace.get('frames'))[0];
+
+        System.assertEquals(expected.get('fileName'), frameMap.get('filename'));
+        System.assertEquals(expected.get('className'), frameMap.get('class_name'));
+        System.assertEquals(expected.get('fileName'), frameMap.get('method'));
+        System.assertEquals(expected.get('line'), frameMap.get('lineno'));
+        System.assertEquals(expected.get('column'), frameMap.get('colno'));
     }
 }

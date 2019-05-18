@@ -5,28 +5,31 @@ public with sharing class DataBuilder {
 
     public Map<String, Object> buildPayload(String level, String message)
     {
-        Map<String, Object> body = this.buildMessageBody(message);
-
-        Map<String, Object> data = this.buildDataStructure(level, this.config.environment(), body);
-
-        Map<String, Object> payload = this.buildPayloadStructure(data);
-        
-        return payload;
+        return buildPayloadStructure(level, this.buildMessageBody(message));
     }
 
     public Map<String, Object> buildPayload(Exception exc)
     {
-        Map<String, Object> body = this.buildTraceBody(exc);
+        return buildPayloadStructure('error', this.buildTraceBody(exc));
+    }
 
-        Map<String, Object> data = this.buildDataStructure('error', this.config.environment(), body);
+    public Map<String, Object> buildPayload(ExceptionData exData)
+    {
+        Map<String, Object> payload = buildPayloadStructure('error', this.buildTraceBody(exData));
 
-        Map<String, Object> payload = this.buildPayloadStructure(data);
-        
+        Map<String, Object> custom = new Map<String, Object>();
+        custom.put('context', exData.context());
+
+        Map<String, Object> data = (Map<String, Object>)payload.get('data');
+        data.put('custom', custom);
+
         return payload;
     }
 
-    private Map<String, Object> buildPayloadStructure(Map<String, Object> data)
+    private Map<String, Object> buildPayloadStructure(String level, Map<String, Object> body)
     {
+        Map<String, Object> data = this.buildDataStructure(level, this.config.environment(), body);
+
         Map<String, Object> structure = new Map<String, Object>();
         structure.put('access_token', this.config.accessToken());
         structure.put('data', data);
@@ -35,7 +38,12 @@ public with sharing class DataBuilder {
 
     private Map<String, Object> buildDataStructure(String level, String environment, Map<String, Object> body)
     {
+        Map<String, Object> notifierMap = new Map<String, Object>();
+        notifierMap.put('name', Notifier.NAME);
+        notifierMap.put('version', Notifier.VERSION);
+
         Map<String, Object> structure = new Map<String, Object>();
+        structure.put('notifier', notifierMap);
         structure.put('level', level);
         structure.put('environment', environment);
         structure.put('framework', 'apex');
@@ -54,12 +62,28 @@ public with sharing class DataBuilder {
         return body;
     }
 
+    private Map<String, Object> buildTraceBody(ExceptionData exData)
+    {
+        List<Map<String, Object>> framesList = new List<Map<String, Object>>();
+
+        Map<String, Object> frameMap = new Map<String, Object>();
+        frameMap.put('filename', exData.fileName());
+        frameMap.put('class_name', exData.className());
+        frameMap.put('method', exData.fileName());
+        frameMap.put('lineno', exData.line());
+        frameMap.put('colno', exData.column());
+
+        framesList.add(frameMap);
+
+        Map<String, Object> excMap = new Map<String, Object>();
+        excMap.put('class', exData.className());
+        excMap.put('message', exData.message());
+        
+        return buildTraceStructure(excMap, framesList);
+    }
+
     private Map<String, Object> buildTraceBody(Exception exc)
     {
-        Map<String, Object> body = new Map<String, Object>();
-
-        Map<String, Object> traceMap = new Map<String, Object>();
-
         List<Map<String, Object>> framesList = new List<Map<String, Object>>();
 
         String[] frames = exc.getStackTraceString().split('\n');
@@ -90,8 +114,20 @@ public with sharing class DataBuilder {
         excMap.put('class', exc.getTypeName());
         excMap.put('message', exc.getMessage());
 
-        traceMap.put('exception', excMap);
+        return buildTraceStructure(excMap, framesList);
+    }
+
+    private Map<String, Object> buildTraceStructure(
+        Map<String, Object> exceptionMap,
+        List<Map<String, Object>> framesList
+    ) {
+        Map<String, Object> body = new Map<String, Object>();
+
+        Map<String, Object> traceMap = new Map<String, Object>();
+
+        traceMap.put('exception', exceptionMap);
         traceMap.put('frames', framesList);
+
         body.put('trace', traceMap);
 
         return body;
