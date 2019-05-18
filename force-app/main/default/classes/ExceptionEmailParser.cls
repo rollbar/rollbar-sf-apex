@@ -1,8 +1,6 @@
 public with sharing class ExceptionEmailParser {
     public static ExceptionData parse(String emailBody) {
 
-        System.debug(emailBody);
-
         ExceptionData exData = new ExceptionData(
             parseEnvironment(emailBody),
             parseUserOrg(emailBody),
