@@ -4,17 +4,24 @@
         <name>ApexClass</name>
 
         <members>Config</members>
+        <members>DataBuilder</members>
+        <members>ExceptionData</members>
+        <members>ExceptionEmailParser</members>
         <members>Notifier</members>
         <members>Rollbar</members>
+        <members>RollbarExceptionEmailHandler</members>
         <members>RollbarNotInitializedException</members>
 
         <!-- tests -->
         <members>ConfigTest</members>
+        <members>DataBuilderTest</members>
+        <members>ExceptionEmailParserTest</members>
         <members>NotifierTest</members>
         <members>RollbarTest</members>
 
         <!-- test helpers -->
-        <members>RollbarApiCalloutMock</members>        
+        <members>RollbarApiCalloutMock</members>
+        <members>DataBuilderTestException</members>    
     </types>
     <version>45.0</version>
 </Package>
