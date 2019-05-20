@@ -11,29 +11,30 @@ public with sharing class Notifier
 
     public HttpResponse log(String level, String message)
     {
-        String payload = JSON.serialize(this.dataBuilder.buildPayload(level, message));
-        return reportPayload(payload);
+        return send(dataBuilder.buildPayload(level, message));
     }
 
     public HttpResponse log(Exception exc)
     {
-        String payload = JSON.serialize(this.dataBuilder.buildPayload(exc));
-        return reportPayload(payload);
+        return send(dataBuilder.buildPayload(exc));
     }
 
     public HttpResponse log(Exception exc, Map<String, Object> custom)
     {
-        String payload = JSON.serialize(this.dataBuilder.buildPayload(exc, custom));
-        return reportPayload(payload);
+        return send(dataBuilder.buildPayload(exc, custom));
     }
 
     public HttpResponse log(ExceptionData exData)
     {
-        String payload = JSON.serialize(this.dataBuilder.buildPayload(exData));
-        return reportPayload(payload);
+        return send(dataBuilder.buildPayload(exData));
     }
 
-    private HttpResponse reportPayload(String payload)
+    private HttpResponse send(Map<String, Object> payload)
+    {
+        return send(JSON.serialize(payload));
+    }
+
+    private HttpResponse send(String payload)
     {
         HttpRequest request = new HttpRequest();
         request.setEndpoint(this.config.endpoint());
