@@ -56,6 +56,49 @@ public class DataBuilderTest
     }
 
     @isTest
+    static void testBuildTraceChainPayload()
+    {
+        DataBuilder subject = new DataBuilder(new Config('foo', 'bar'));
+        String expectedMessage1 = 'Exception message in test 001';
+        String expectedClass1;
+        String expectedMessage2 = 'Exception message in test 002';
+        String expectedClass2;
+
+        try {
+            try {
+                DataBuilderTestException exc2 = new DataBuilderTestException(expectedMessage2);
+                expectedClass2 = exc2.getTypeName();
+                throw exc2;
+            } catch(Exception exc2) {
+                throw new ExceptionEmailParsingException(expectedMessage1, exc2);
+            }
+        } catch(Exception exc1) {
+            expectedClass1 = exc1.getTypeName();
+
+            Map<String, Object> result = subject.buildPayload(exc1);
+
+            Map<String, Object> data = (Map<String, Object>)result.get('data');
+
+            Map<String, Object> notifierMap = (Map<String, Object>)data.get('notifier');
+            System.assertEquals(Notifier.NAME, (String)notifierMap.get('name'));
+            System.assertEquals(Notifier.VERSION, (String)notifierMap.get('version'));
+
+            Map<String, Object> body = (Map<String, Object>)data.get('body');
+            List<Map<String, Object>> traceChain = (List<Map<String, Object>>)body.get('trace_chain');
+            Map<String, Object> trace1 = (Map<String, Object>)traceChain[0];
+            Map<String, Object> trace2 = (Map<String, Object>)traceChain[1];
+            Map<String, Object> exc1Map = (Map<String, Object>)trace1.get('exception');
+            Map<String, Object> exc2Map = (Map<String, Object>)trace2.get('exception');
+
+            System.assertEquals(expectedMessage1, exc1Map.get('message'));
+            System.assertEquals(expectedClass1, exc1Map.get('class'));
+
+            System.assertEquals(expectedMessage2, exc2Map.get('message'));
+            System.assertEquals(expectedClass2, exc2Map.get('class'));
+        }
+    }
+
+    @isTest
     static void testBuildExceptionDataPayload()
     {
         DataBuilder subject = new DataBuilder(new Config('foo', 'bar'));

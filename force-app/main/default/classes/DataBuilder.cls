@@ -10,7 +10,11 @@ public with sharing class DataBuilder {
 
     public Map<String, Object> buildPayload(Exception exc)
     {
-        return buildPayloadStructure('error', this.buildTraceBody(exc));
+        if (exc.getCause() != null) {
+            return buildTraceChainPayload(exc);
+        } else {
+            return buildExceptionPayload(exc);
+        }
     }
 
     public Map<String, Object> buildPayload(ExceptionData exData)
@@ -24,6 +28,27 @@ public with sharing class DataBuilder {
         data.put('custom', custom);
 
         return payload;
+    }
+
+    private Map<String, Object> buildExceptionPayload(Exception exc)
+    {
+        return buildPayloadStructure('error', this.buildTraceBody(exc));
+    }
+
+    private Map<String, Object> buildTraceChainPayload(Exception exc)
+    {
+        Map<String, Object> outterExTrace = (Map<String, Object>)this.buildTraceBody(exc).get('trace');
+        Map<String, Object> innerExTrace = (Map<String, Object>)this.buildTraceBody(exc.getCause()).get('trace');
+
+        List<Map<String, Object>> traceChainList = new List<Map<String, Object>>();
+        traceChainList.add(outterExTrace);
+        traceChainList.add(innerExTrace);
+
+
+        Map<String, Object> body = new Map<String, Object>();
+        body.put('trace_chain', traceChainList);
+
+        return buildPayloadStructure('error', body);
     }
 
     private Map<String, Object> buildPayloadStructure(String level, Map<String, Object> body)
@@ -90,6 +115,8 @@ public with sharing class DataBuilder {
         for (String frameStr : frames) {
             if (frameStr == '()') {
                 continue;
+            } else if (frameStr.toLowerCase() == 'caused by') {
+                break;
             }
 
             Map<String, Object> frameMap = new Map<String, Object>();
