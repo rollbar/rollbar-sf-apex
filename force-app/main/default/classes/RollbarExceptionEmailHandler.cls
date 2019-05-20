@@ -23,9 +23,12 @@ global class RollbarExceptionEmailHandler implements Messaging.InboundEmailHandl
         throw new ExceptionEmailParsingException('Unable to process unhandled email', exc);
       }
     } catch(ExceptionEmailParsingException wrapper) {
-      // TODO: add full email body in case we can't process exception email
       wrapper.getStackTraceString(); // without those calls strack trace string is not populated
-      Rollbar.log(wrapper);
+
+      Map<String, String> custom = new Map<String, String>();
+      custom.put('email_body', emailBody);
+
+      Rollbar.log(wrapper, custom);
     }
 
     // Set the result to true. No need to send an email back to the user 

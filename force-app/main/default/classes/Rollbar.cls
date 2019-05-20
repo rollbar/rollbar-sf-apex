@@ -36,6 +36,11 @@ public with sharing class Rollbar {
         return instance.notifier.log(exc);
     }
 
+    public static HttpResponse log(Exception exc, Map<String, Object> custom) {
+        Rollbar instance = initializedInstance();
+        return instance.notifier.log(exc, custom);
+    }
+
     public static HttpResponse log(ExceptionData exData) {
         Rollbar instance = initializedInstance();
         return instance.notifier.log(exData);

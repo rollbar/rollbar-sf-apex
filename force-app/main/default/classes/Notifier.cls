@@ -21,6 +21,12 @@ public with sharing class Notifier
         return reportPayload(payload);
     }
 
+    public HttpResponse log(Exception exc, Map<String, Object> custom)
+    {
+        String payload = JSON.serialize(this.dataBuilder.buildPayload(exc, custom));
+        return reportPayload(payload);
+    }
+
     public HttpResponse log(ExceptionData exData)
     {
         String payload = JSON.serialize(this.dataBuilder.buildPayload(exData));

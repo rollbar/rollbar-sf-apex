@@ -56,6 +56,22 @@ public class DataBuilderTest
     }
 
     @isTest
+    static void testBuildExceptionPayloadWithCustom()
+    {
+        DataBuilder subject = new DataBuilder(new Config('foo', 'bar'));
+        Map<String, String> expectedCustom = new Map<String, String>();
+        expectedCustom.put('foo', 'bar');
+
+        DataBuilderTestException exc = new DataBuilderTestException('foobar');
+
+        Map<String, Object> result = subject.buildPayload(exc, expectedCustom);
+        Map<String, Object> data = (Map<String, Object>)result.get('data');
+        Map<String, Object> custom = (Map<String, Object>)data.get('custom');
+
+        System.assertEquals(expectedCustom.get('foo'), (String)custom.get('foo'));
+    }
+
+    @isTest
     static void testBuildTraceChainPayload()
     {
         DataBuilder subject = new DataBuilder(new Config('foo', 'bar'));

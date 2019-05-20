@@ -5,37 +5,37 @@ public with sharing class DataBuilder {
 
     public Map<String, Object> buildPayload(String level, String message)
     {
-        return buildPayloadStructure(level, this.buildMessageBody(message));
+        return buildPayloadStructure(level, buildMessageBody(message), null);
     }
 
     public Map<String, Object> buildPayload(Exception exc)
     {
-        if (exc.getCause() != null) {
-            return buildTraceChainPayload(exc);
-        } else {
-            return buildExceptionPayload(exc);
-        }
+        return buildPayloadStructure('error', buildExceptionBody(exc), null);
+    }
+
+    public Map<String, Object> buildPayload(Exception exc, Map<String, Object> custom)
+    {
+        return buildPayloadStructure('error', buildExceptionBody(exc), custom);
     }
 
     public Map<String, Object> buildPayload(ExceptionData exData)
     {
-        Map<String, Object> payload = buildPayloadStructure('error', this.buildTraceBody(exData));
-
         Map<String, Object> custom = new Map<String, Object>();
         custom.put('context', exData.context());
 
-        Map<String, Object> data = (Map<String, Object>)payload.get('data');
-        data.put('custom', custom);
-
-        return payload;
+        return buildPayloadStructure('error', buildTraceBody(exData), custom);
     }
 
-    private Map<String, Object> buildExceptionPayload(Exception exc)
+    private Map<String, Object> buildExceptionBody(Exception exc)
     {
-        return buildPayloadStructure('error', this.buildTraceBody(exc));
+        if (exc.getCause() == null) {
+            return buildTraceBody(exc);
+        } else {
+            return buildTraceChainBody(exc);
+        }
     }
 
-    private Map<String, Object> buildTraceChainPayload(Exception exc)
+    private Map<String, Object> buildTraceChainBody(Exception exc)
     {
         Map<String, Object> outterExTrace = (Map<String, Object>)this.buildTraceBody(exc).get('trace');
         Map<String, Object> innerExTrace = (Map<String, Object>)this.buildTraceBody(exc.getCause()).get('trace');
@@ -48,12 +48,20 @@ public with sharing class DataBuilder {
         Map<String, Object> body = new Map<String, Object>();
         body.put('trace_chain', traceChainList);
 
-        return buildPayloadStructure('error', body);
+        return body;
     }
 
-    private Map<String, Object> buildPayloadStructure(String level, Map<String, Object> body)
-    {
-        Map<String, Object> data = this.buildDataStructure(level, this.config.environment(), body);
+    private Map<String, Object> buildPayloadStructure(
+        String level, 
+        Map<String, Object> body, 
+        Map<String, Object> custom
+    ) {
+        Map<String, Object> data = this.buildDataStructure(
+            level, 
+            this.config.environment(), 
+            body, 
+            custom
+        );
 
         Map<String, Object> structure = new Map<String, Object>();
         structure.put('access_token', this.config.accessToken());
@@ -61,8 +69,13 @@ public with sharing class DataBuilder {
         return structure;
     }
 
-    private Map<String, Object> buildDataStructure(String level, String environment, Map<String, Object> body)
-    {
+    private Map<String, Object> buildDataStructure(
+        String level,
+        String environment,
+        Map<String, Object> body,
+        Map<String, Object> custom
+    ) {
+        
         Map<String, Object> notifierMap = new Map<String, Object>();
         notifierMap.put('name', Notifier.NAME);
         notifierMap.put('version', Notifier.VERSION);
@@ -73,6 +86,8 @@ public with sharing class DataBuilder {
         structure.put('environment', environment);
         structure.put('framework', 'apex');
         structure.put('body', body);
+        structure.put('custom', custom);
+
         return structure;
     }
 
