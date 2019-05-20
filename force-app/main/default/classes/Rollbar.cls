@@ -1,8 +1,12 @@
 /**
  * Installation:
- * 1. Add api.rollbar.com in `Remote Sites` in Salesforce Setup.
+ * 1. Create a new SF org.
+ * 1. Create a new Rollbar project and change access token in RollbarExceptionEmailHandler and push to org.
+ * 1. Add https://api.rollbar.com in `Remote Site Settings` in Salesforce Setup.
  * 2. Add email service in `Email Services` in Salesforce Setup pointint to RollbarExceptionEmailHandler class.
+        Check `Active` box.
  * 3. Add Salesforce-generated email address from the added email service to `Apex Exception Email` addresses.
+        Leave `Accept Email From` field empty.
  */
 public with sharing class Rollbar {
 
