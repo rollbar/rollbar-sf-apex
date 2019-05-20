@@ -20,7 +20,7 @@ global class RollbarExceptionEmailHandler implements Messaging.InboundEmailHandl
         Rollbar.log(exData);
       } catch(Exception exc) {
         exc.getStackTraceString(); // without those calls strack trace string is not populated
-        throw new ExceptionEmailParsingException('Unable to process unhandled email', exc);
+        throw new ExceptionEmailParsingException('Unable to process unhandled exception email', exc);
       }
     } catch(ExceptionEmailParsingException wrapper) {
       wrapper.getStackTraceString(); // without those calls strack trace string is not populated
