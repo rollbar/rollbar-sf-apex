@@ -7,12 +7,12 @@ global class RollbarExceptionEmailHandler implements Messaging.InboundEmailHandl
     // Apex Email Service
     Messaging.InboundEmailResult result = new Messaging.InboundEmailResult();
 
-    String emailBody = '';
+    String emailBody = '';    
 
     // Add the email plain text into the local variable 
     emailBody = email.plainTextBody;
 
-    Rollbar.init('access-token', UserInfo.getOrganizationId());
+    Rollbar.init();
 
     try {
       try {
