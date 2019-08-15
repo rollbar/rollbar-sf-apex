@@ -136,8 +136,16 @@ public with sharing class DataBuilder {
 
             Map<String, Object> frameMap = new Map<String, Object>();
             frameMap.put('filename', frameStr);
-            frameMap.put('class_name', frameStr.split(':')[0].split('\\.')[1]);
-            frameMap.put('method', frameStr.split(':')[0].split('\\.')[2]);
+
+            String className = frameStr.split(':')[0];
+            String methodName = '';
+            if (className != 'AnonymousBlock') {
+                className = className.split('\\.')[1];
+                methodName = frameStr.split(':')[0].split('\\.')[2];
+            }
+
+            frameMap.put('class_name', className);
+            frameMap.put('method', methodName);
 
             Pattern linePattern = Pattern.compile('line (\\d+)');
             Matcher lineMatcher = linePattern.matcher(frameStr);

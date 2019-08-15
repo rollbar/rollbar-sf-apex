@@ -22,6 +22,13 @@ public class DataBuilderTest
     }
 
     @isTest
+    static void testBuildExceptionPayloadAnonymousBlock()
+    {
+        // TODO: to be implemented
+        // Test recognition of AnonymousBlocks in DataBuilder.buildTraceBody() line 142
+    }
+
+    @isTest
     static void testBuildExceptionPayload()
     {
         DataBuilder subject = new DataBuilder(new Config('foo', 'bar'));
