@@ -1,0 +1,63 @@
+<!-- /apex/RollbarTestPage -->
+<apex:page controller="RollbarTestPageController" title="Rollbar Apex Reporting Examples">
+    <h1>Rollbar Test Page</h1>
+    <apex:form>
+        <apex:pageBlock title="Examples">
+            <apex:pageBlockSection title="Report an arbitrary string message">
+                <code>
+                    Rollbar.log('info', 'Hello world from my Salesforce org');
+                </code>
+                <p>Report a string "Hello world from my Salesforce org" to Rollbar.</p>
+                <apex:commandButton action="{!testLogMessage}" value="Run" />
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Report an exception with a stack trace">
+                <code>
+                        try {<br />
+                            <mark>this.buildData();</mark><br />
+                        } catch(Exception ex) {<br />
+                            Map&#x3C;String, Object&#x3E; custom = new Map&#x3C;String, Object&#x3E;();<br />
+                            custom.put(&#x27;project&#x27;, &#x27;foo&#x27;);<br />
+                            custom.put(&#x27;project_view&#x27;, &#x27;bar&#x27;);<br />
+                            <mark>
+                            Rollbar.log(<br />
+                                ex,<br />
+                                custom<br />
+                            );<br />
+                            </mark>
+                        }<br />
+                        <br /><br />
+                        public Map&#x3C;String, String&#x3E; buildData()<br />
+                        {<br />
+                            Map&#x3C;String, String&#x3E; structure = new Map&#x3C;String, String&#x3E;();<br />
+                            structure.put(&#x27;language&#x27;, &#x27;Apex&#x27;);<br />
+                            structure.put(&#x27;version&#x27;, this.buildVersionString());<br />
+                            return structure;<br />
+                        }<br />
+                        <br /><br />
+                        public String buildVersionString() {<br />
+                            String version = null;<br />
+                            if (<mark>version.length()</mark> == 0) {<br />
+                                version = this.getMajor() +<br />
+                                    &#x27;.&#x27; +<br />
+                                    this.getMinor() +<br />
+                                    &#x27;.&#x27; +<br />
+                                    this.getPatch();<br />
+                            }<br />
+                            return version;<br />
+                        }
+                </code>
+                <p>Report an exception with a stack trace to Rollbar.</p>
+                <apex:commandButton action="{!testLogException}" value="Run" />
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Report an unhandled Apex exception">
+                <code>
+                    String myString = null;<br />
+                    <mark>myString.length();</mark>
+                </code>
+                <p>This example causes an unhandled null pointer exception in Apex code.</p>
+                <p>The expected behavior is to receive an occurrence in Rollbar including information about the exception.</p>
+                <apex:commandButton action="{!testUnhadledException}" value="Run" />
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>
