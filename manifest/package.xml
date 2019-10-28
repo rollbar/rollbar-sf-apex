@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Rollbar for Apex</fullName>
+    <version>45.0</version>
+    <!-- <postInstallClass>PostInstallClass</postInstallClass> -->
     <types>
         <name>ApexClass</name>
 
@@ -24,5 +27,9 @@
         <members>RollbarApiCalloutMock</members>
         <members>DataBuilderTestException</members>    
     </types>
-    <version>45.0</version>
+
+    <types>
+        <members>remotesitehelper</members>
+        <name>ApexComponent</name>
+    </types>
 </Package>

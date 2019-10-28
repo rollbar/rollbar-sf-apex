@@ -1,0 +1,18 @@
+<apex:page controller="RollbarConfigureController">
+    <h1>Congratulations on choosing Rollbar</h1>
+    <p>To finish the installation of Rollbar Apex SDK, please provide your Rollbar project server side access token:</p>
+    <apex:form>
+        <apex:outputLabel value="post_server_item Access Token" for="rollbarAccessToken"/>
+        <apex:inputText value="{!accessToken}" id="rollbarAccessToken" />
+        <apex:commandButton action="{!save}" value="Finish" id="rollbarConfigure"/>
+    </apex:form>
+
+    <c:remotesitehelper rssName="mdapi"
+		rssDescription="SFDC to SFDC metadata api."
+		pageOverview="This is an awesome overview of my tool."
+		pageOverviewLinkURL="http://google.com"
+		pageOverviewLinkText="Google This tool!"
+		pageSectionTitle="My Awesome Package Welcome Page"
+		pageSectionSubTitle="Welcome"
+		/>
+</apex:page>
