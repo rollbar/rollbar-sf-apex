@@ -164,41 +164,41 @@ public with sharing class RollbarInstaller {
         // TODO: remove when installation is finished
         return true;
         
-        try {
-            EmailServicesFunction emailFunction = [SELECT Id FROM EmailServicesFunction WHERE FunctionName='RollbarEmailService'];
-            EmailServicesAddress emailServicesAddress = [SELECT Id, LocalPart, EmailDomainName FROM EmailServicesAddress WHERE FunctionId = :emailFunction.Id];
-        } catch (Exception ex) {
-            return false;    
-        }
+        // try {
+        //     EmailServicesFunction emailFunction = [SELECT Id FROM EmailServicesFunction WHERE FunctionName='RollbarEmailService'];
+        //     EmailServicesAddress emailServicesAddress = [SELECT Id, LocalPart, EmailDomainName FROM EmailServicesAddress WHERE FunctionId = :emailFunction.Id];
+        // } catch (Exception ex) {
+        //     return false;    
+        // }
 
-        return true;
+        // return true;
     }
 
     public static Boolean apexNotificationsForwardingSetUp()
     {
         // TODO: remove when installation is finished
         return true;
-        
-        EmailServicesFunction emailFunction;
-        EmailServicesAddress emailServicesAddress;
-        try {
-            emailFunction = [SELECT Id FROM EmailServicesFunction WHERE FunctionName='RollbarEmailService'];
-            emailServicesAddress = [SELECT Id, LocalPart, EmailDomainName FROM EmailServicesAddress WHERE FunctionId = :emailFunction.Id];
-        } catch (Exception ex) {
-            return false;    
-        }
 
-        String emailServiceAddress = emailServicesAddress.LocalPart + '@' + emailServicesAddress.EmailDomainName;
+        // EmailServicesFunction emailFunction;
+        // EmailServicesAddress emailServicesAddress;
+        // try {
+        //     emailFunction = [SELECT Id FROM EmailServicesFunction WHERE FunctionName='RollbarEmailService'];
+        //     emailServicesAddress = [SELECT Id, LocalPart, EmailDomainName FROM EmailServicesAddress WHERE FunctionId = :emailFunction.Id];
+        // } catch (Exception ex) {
+        //     return false;    
+        // }
 
-        Boolean forwarding = false;
-        ApexEmailNotification[] apexNotifications = [SELECT Email, UserId FROM ApexEmailNotification];
-        for (ApexEmailNotification notification : apexNotifications) {
-            if (notification.Email == emailServiceAddress) {
-                forwarding = true;
-            }
-        }
+        // String emailServiceAddress = emailServicesAddress.LocalPart + '@' + emailServicesAddress.EmailDomainName;
 
-        return forwarding;
+        // Boolean forwarding = false;
+        // ApexEmailNotification[] apexNotifications = [SELECT Email, UserId FROM ApexEmailNotification];
+        // for (ApexEmailNotification notification : apexNotifications) {
+        //     if (notification.Email == emailServiceAddress) {
+        //         forwarding = true;
+        //     }
+        // }
+
+        // return forwarding;
     }
 
     public static Boolean accessTokenCorrect(Config config)
