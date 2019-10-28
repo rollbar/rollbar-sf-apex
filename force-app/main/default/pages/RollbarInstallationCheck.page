@@ -60,6 +60,7 @@
                     <li>Apex Notifications forwarding set up: {!checks['apexNotificationsForwardingSetUp']} </li>
                     <li>Access Token correct: {!checks['accessTokenCorrect']} </li>
                 </ul>
+                <a href="/apex/RollbarConfigure">Back to the Configuration Page</a>
             </div>
 
             <div style="display:{!IF(installed, 'block', 'none')}">

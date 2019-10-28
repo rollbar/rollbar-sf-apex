@@ -20,7 +20,13 @@ public with sharing class RollbarConfigureController {
 
     public Pagereference save()
     {
-        Config config = new Config(this.accessToken, UserInfo.getOrganizationId());
+        Config config;
+        
+        try {
+            config = new Config(this.accessToken, UserInfo.getOrganizationId());
+        } catch(RollbarNotInitializedException ex) {
+            return null;
+        }
 
         RollbarInstaller.install(config);
 
