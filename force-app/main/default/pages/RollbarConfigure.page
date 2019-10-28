@@ -1,18 +1,102 @@
-<apex:page controller="RollbarConfigureController">
-    <h1>Congratulations on choosing Rollbar</h1>
-    <p>To finish the installation of Rollbar Apex SDK, please provide your Rollbar project server side access token:</p>
-    <apex:form>
-        <apex:outputLabel value="post_server_item Access Token" for="rollbarAccessToken"/>
-        <apex:inputText value="{!accessToken}" id="rollbarAccessToken" />
-        <apex:commandButton action="{!save}" value="Finish" id="rollbarConfigure"/>
-    </apex:form>
+<apex:page controller="RollbarConfigureController" action="{!check}">
+    <style>
+        body, html {
+            background-image: radial-gradient(circle at 50% 66%,#0c84d2,#104c91);
+            height: 100%;
+            color: #fff
+        }
 
-    <c:remotesitehelper rssName="mdapi"
-		rssDescription="SFDC to SFDC metadata api."
-		pageOverview="This is an awesome overview of my tool."
-		pageOverviewLinkURL="http://google.com"
-		pageOverviewLinkText="Google This tool!"
-		pageSectionTitle="My Awesome Package Welcome Page"
-		pageSectionSubTitle="Welcome"
-		/>
+        h3 {
+            font-size: 24px;
+        }
+
+        h4 {
+            font-size: 16px;
+        }
+
+        section, .next-step {
+            margin-top: 2em;
+        }
+
+        .next-step {
+            text-align: center;
+        }
+
+        header {
+            text-align: center;
+        }
+
+        .content {
+            width: 50%;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin: 0 auto;
+            width: 414px;
+            margin-bottom: 2em;
+        }
+
+        .success {
+            color: rgb(176, 211, 116);
+        }
+
+        .error {
+            color:rgb(223, 75, 75);
+        }
+
+        input {
+            padding: 10px !important;
+            font-size: 24px !important;
+            border: none !important;
+        }
+
+        .next-step .btn {
+            background:  rgb(176, 211, 116);
+        }
+
+        .center {
+            text-align:center;
+        }
+    </style>
+
+    <div class="content">
+
+        <div class="header">
+            <div>
+                <img src="https://files.readme.io/22a730d-small-rollbar-logo-white-horiz.png" />
+            </div>
+            <h2>Thank you for choosing us...</h2>
+        </div>
+
+
+    
+        <apex:pageBlock>
+            <h3>Configure Rollbar for Apex</h3>
+            <section>
+                <h4>
+                    1. Enable calls to your Metdata API:
+                </h4>
+                <c:remotesitehelper rssName="mdapi"
+                                    rssDescription="SFDC to SFDC metadata api."
+                                    pageOverview="Rollbar for Apex requires allowing calls to your organization's Metdata API endpoint."
+                />
+            </section>
+            <section>
+                <h4>
+                    2. Set up your Rollbar project post access token:
+                </h4>
+
+                <apex:form>
+                    <p class="center">
+                        <apex:inputText value="{!accessToken}" id="rollbarAccessToken" html-placeholder="Rollbar Access Token" />
+                    </p>
+                    <div class="next-step">
+                        <apex:commandButton action="{!save}" value="Finish" id="rollbarConfigure" />
+                    </div>
+                </apex:form>
+            </section>
+        </apex:pageBlock>
+
+    </div>
 </apex:page>

@@ -1,6 +1,7 @@
 public with sharing class RollbarConfigureController {
 
     public Map<String, Boolean> checks  { get; private set; }
+    public Boolean installed { get; private set; }
 
     protected RollbarSettings__c settings { get; set; }
     public String accessToken {
@@ -13,6 +14,7 @@ public with sharing class RollbarConfigureController {
     }
 
     public RollbarConfigureController() {
+        this.installed = false;
         this.settings = RollbarSettings__c.getOrgDefaults();
     }
 
@@ -22,7 +24,9 @@ public with sharing class RollbarConfigureController {
 
         RollbarInstaller.install(config);
 
-        return null;
+        PageReference checkPage = new PageReference('/apex/RollbarInstallationCheck');
+        checkPage.setRedirect(true);
+        return checkPage;
     }
 
     public Pagereference check()
@@ -30,7 +34,16 @@ public with sharing class RollbarConfigureController {
         Config config = new Config(this.accessToken, UserInfo.getOrganizationId());
 
         this.checks = RollbarInstaller.check(config);
-        
+
+        Boolean installed = true;
+        for (String key : this.checks.keySet()) {
+            if (!this.checks.get(key)) {
+                installed = false;
+                break;
+            }
+        }
+        this.installed = installed;
+
         return null;
     }
 }

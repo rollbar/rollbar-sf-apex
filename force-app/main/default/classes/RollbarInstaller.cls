@@ -1,16 +1,38 @@
 public with sharing class RollbarInstaller {
     
-    public Map<String, Boolean> checks { get; private set; }
-    
     public static Map<String, Boolean> check(Config config)
     {
         Map<String, Boolean> checks = new Map<String, Boolean>();
 
-        checks.put('rollbarApiEndpointAllowed', rollbarApiEndpointAllowed(config.endpoint()));
-        checks.put('rollbarPingSuccessful', rollbarPingSuccessful());
-        checks.put('rollbarEmailServiceSetUp', rollbarEmailServiceSetUp());
-        checks.put('apexNotificationsForwardingSetUp', apexNotificationsForwardingSetUp());
-        checks.put('accessTokenCorrect', accessTokenCorrect(config));
+        try {
+            checks.put('rollbarApiEndpointAllowed', rollbarApiEndpointAllowed(config.endpoint()));
+        } catch (Exception ex) {
+            checks.put('rollbarApiEndpointAllowed', false);
+        }
+
+        try {
+            checks.put('rollbarPingSuccessful', rollbarPingSuccessful());
+        } catch (Exception ex) {
+            checks.put('rollbarPingSuccessful', false);
+        }
+
+        try {
+            checks.put('rollbarEmailServiceSetUp', rollbarEmailServiceSetUp());
+        } catch (Exception ex) {
+            checks.put('rollbarEmailServiceSetUp', false);
+        }
+        
+        try {
+            checks.put('apexNotificationsForwardingSetUp', apexNotificationsForwardingSetUp());
+        } catch (Exception ex) {
+            checks.put('apexNotificationsForwardingSetUp', false);
+        }
+
+        try {
+            checks.put('accessTokenCorrect', accessTokenCorrect(config));
+        } catch (Exception ex) {
+            checks.put('accessTokenCorrect', false);
+        }
 
         return checks;
     }
