@@ -1,5 +1,8 @@
 public with sharing class Config {
     public Config(String accessToken, String environment) {
+        if (accessToken.length() == 0 || accessToken == '') {
+            throw new RollbarNotInitializedException();
+        }
         this.accessToken = accessToken;
         this.environment = environment;
         this.endpoint = 'https://api.rollbar.com/api/1/item/';
