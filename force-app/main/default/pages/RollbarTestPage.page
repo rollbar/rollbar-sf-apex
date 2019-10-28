@@ -47,7 +47,10 @@
                         }
                 </code>
                 <p>Report an exception with a stack trace to Rollbar.</p>
-                <apex:commandButton action="{!testLogException}" value="Run" />
+            </apex:pageBlockSection>
+            <apex:pageBlockSection>
+                <apex:commandButton action="{!testLogException}" value="Run with Rollbar" />
+                <apex:commandButton action="{!testLogExceptionNoRollbar}" value="Run without Rollbar" />
             </apex:pageBlockSection>
             <apex:pageBlockSection title="Report an unhandled Apex exception">
                 <code>
@@ -56,7 +59,11 @@
                 </code>
                 <p>This example causes an unhandled null pointer exception in Apex code.</p>
                 <p>The expected behavior is to receive an occurrence in Rollbar including information about the exception.</p>
+                
+            </apex:pageBlockSection>
+            <apex:pageBlockSection>
                 <apex:commandButton action="{!testUnhadledException}" value="Run" />
+                <apex:commandButton action="{!sendApexExceptionNotification}" value="Send Apex Notification Manually" />
             </apex:pageBlockSection>
         </apex:pageBlock>
     </apex:form>

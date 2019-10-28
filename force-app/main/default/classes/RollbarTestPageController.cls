@@ -15,6 +15,11 @@ public with sharing class RollbarTestPageController {
         return null;
     }
 
+    public Pagereference testLogExceptionNoRollbar() {
+        this.buildData();
+        return null;
+    }
+
     public Pagereference testLogException() {
         Rollbar.init();
         try {
@@ -27,8 +32,29 @@ public with sharing class RollbarTestPageController {
                 ex,
                 custom
             );
+            throw ex;
         }
         return null;
+    }
+
+    public void sendApexExceptionNotification() {
+        Messaging.SingleEmailMessage message = new Messaging.SingleEmailMessage();
+        message.toAddresses = new String[] { 'rollbaremailservice@2my1sei6hsps5lb9mk19i6pcs6rgojf2drlc44ubduzh0ups3b.2e-mc3puaq.na91.apex.salesforce.com' };
+        message.subject = 'Developer script exception from Rollbar, Inc. : RollbarTestPageController : Attempt to de-reference a null object';
+        message.plainTextBody = 'Apex script unhandled exception by user/organization: 0052E00000Hy7Kg/00D2E000000mc3P\n' +
+                                '\n' +
+                                'Visualforce Page: /apex/RollbarTestPage\n' +
+                                '\n' +
+                                '\n' +
+                                '\n' +
+                                'caused by: System.NullPointerException: Attempt to de-reference a null object\n'+
+                                '\n' +
+                                'Class.RollbarTestPageController.buildVersionString: line 50, column 1\n'+
+                                'Class.RollbarTestPageController.buildData: line 44, column 1\n'+
+                                'Class.RollbarTestPageController.testLogException: line 26, column 1\n';
+                                
+        Messaging.SingleEmailMessage[] messages = new List<Messaging.SingleEmailMessage> {message};
+        Messaging.SendEmailResult[] results = Messaging.sendEmail(messages);
     }
 
     public Map<String, String> buildData()
