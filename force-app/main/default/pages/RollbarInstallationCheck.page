@@ -1,0 +1,10 @@
+<apex:page controller="RollbarConfigureController" action="{!check}">
+    <h1>Congratulations on choosing Rollbar</h1>
+    <ul>
+        <li>Rollbar API endpoint allowed: {!checks['rollbarApiEndpointAllowed']}</li>
+        <li>Rollbar ping successful: {!checks['rollbarPingSuccessful']} </li>
+        <li>Rollbar Email Service set up: {!checks['rollbarEmailServiceSetUp']} </li>
+        <li>Apex Notifications forwarding set up: {!checks['apexNotificationsForwardingSetUp']} </li>
+        <li>Access Token correct: {!checks['accessTokenCorrect']} </li>
+    </ul>
+</apex:page>

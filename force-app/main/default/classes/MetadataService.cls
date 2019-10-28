@@ -13533,8 +13533,6 @@ public class MetadataService {
         }
     }
 
-    // TOOD: don't make this a future from here; that's a part of controller logic
-    @future(callout=true)
     public static void createRemoteSiteSetting(String endpointName, String endpointUrl) {
         MetadataService.MetadataPort service = createServiceWithSession();
 
@@ -13554,14 +13552,14 @@ public class MetadataService {
         return service;
     }
 
-    public static void createEmailService(
+    public static List<SaveResult> createEmailService(
         EmailServicesFunction emailService, 
         List<EmailServicesAddress> emailAddresses) {
-            
+
         MetadataPort service = createServiceWithSession();
         
         emailService.emailServicesAddresses = emailAddresses;
 
-        service.createMetadata(new List<Metadata> { emailService });
+        return service.createMetadata(new List<Metadata> { emailService });
     }
 }
