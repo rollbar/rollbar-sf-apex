@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Rollbar for Apex</fullName>
-    <version>45.0</version>
+    <versionNumber>1.2</versionNumber>
     <types>
         <name>ApexClass</name>
 
@@ -36,5 +36,11 @@
     <types>
         <members>RemoteSiteHelper</members>
         <name>ApexComponent</name>
+    </types>
+
+    <types>
+        <members>RollbarConfigure</members>
+        <members>RollbarInstallationCheck</members>
+        <name>ApexPage</name>
     </types>
 </Package>
