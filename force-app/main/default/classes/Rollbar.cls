@@ -29,8 +29,12 @@ public with sharing class Rollbar {
     }
 
     public static Rollbar init(String accessToken, String environment) {
+        return Rollbar.init(new Config(accessToken, environment));
+    }
+
+    public static Rollbar init(Config config) {
         Rollbar instance = instance();
-        instance.config = new Config(accessToken, environment);
+        instance.config = config;
         instance.notifier = new Notifier(instance.config);
         instance.initialized = true;
         return instance;

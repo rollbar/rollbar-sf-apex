@@ -1,0 +1,117 @@
+<apex:page controller="RollbarConfigureController" action="{!check}">
+    <style>
+        body, html {
+            background-image: radial-gradient(circle at 50% 66%,#0c84d2,#104c91);
+            height: 100%;
+            color: #fff
+        }
+
+        h3 {
+            font-size: 24px;
+        }
+
+        section {
+            margin-top: 2em;
+        }
+
+        header {
+            text-align: center;
+        }
+
+        .content {
+            width: 75%;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin: 0 auto;
+            width: 414px;
+            margin-bottom: 2em;
+        }
+
+        .success {
+            color: rgb(176, 211, 116);
+        }
+
+        .error {
+            color:rgb(223, 75, 75);
+            border: none !important;
+        }
+    </style>
+
+    <div class="content">
+
+        <div class="header">
+            <div>
+                <img src="https://files.readme.io/22a730d-small-rollbar-logo-white-horiz.png" />
+            </div>
+            <h2>Thank you for choosing us...</h2>
+        </div>
+        
+        <apex:pageBlock>
+            <div style="display:{!IF(installed, 'none', 'block')}">
+                <header>
+                    <h3 class="error">Oops! Something went wrong.</h3>
+                </header>
+                <ul>
+                    <li>Rollbar API endpoint allowed: {!checks['rollbarApiEndpointAllowed']}</li>
+                    <li>Rollbar ping successful: {!checks['rollbarPingSuccessful']} </li>
+                    <li>Rollbar Email Service set up: {!checks['rollbarEmailServiceSetUp']} </li>
+                    <li>Apex Notifications forwarding set up: {!checks['apexNotificationsForwardingSetUp']} </li>
+                    <li>Access Token correct: {!checks['accessTokenCorrect']} </li>
+                </ul>
+            </div>
+
+            <div style="display:{!IF(installed, 'block', 'none')}">
+                <header>
+                    <h3 class="success">Success</h3>
+                    <p>
+                        We sent an introductory log message to your Rollbar project. Look for item:
+                    </p>
+                    <p>
+                        <code>Rollbar Apex SDK installed correctly in ...</code>
+                    </p>
+                </header>
+                <section>
+                    <h4>
+                        Here is how to get started using Rollbar in your Apex code:
+                    </h4>
+                    <section>
+                        <h5>Initialization</h5>
+                        <p>
+                            <code>Rollbar.init();</code>
+                        </p>
+                        <p>
+                            This call will initialize the Rollbar notifier with your organization's default access token
+                            and environment.
+                        </p>
+                        <p>
+                            <code>Rollbar.init(String accessToken, String environment);</code>
+                        </p>
+                        <p>
+                            With this overload you can provide a custom access token and custom environment for further
+                            reporting.
+                        </p>
+                    </section>
+                    <section>
+                        <h5>Reporting</h5>
+                        <p>
+                            <code>Rollbar.log(String level, String message);</code>
+                        </p>
+                        <p>
+                            This call will report an arbitrary message at one of the Rollbar reporting levels.
+                        </p>
+                        <p>
+                            <code>Rollbar.log(Exception exception);</code>
+                        </p>
+                        <p> 
+                            You can report an exception object with it's stack trace using the above call.
+                        </p>
+                    </section>
+                </section>
+            </div>
+
+        </apex:pageBlock>
+
+    </div>
+</apex:page>
