@@ -2,7 +2,6 @@
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Rollbar for Apex</fullName>
     <version>45.0</version>
-    <!-- <postInstallClass>PostInstallClass</postInstallClass> -->
     <types>
         <name>ApexClass</name>
 
@@ -11,9 +10,13 @@
         <members>ExceptionData</members>
         <members>ExceptionEmailParser</members>
         <members>ExceptionEmailParsingException</members>
+        <members>MetadataService</members>
         <members>Notifier</members>
+        <members>RemoteSiteHelperController</members>
         <members>Rollbar</members>
+        <members>RollbarConfigureController</members>
         <members>RollbarExceptionEmailHandler</members>
+        <members>RollbarInstaller</members>
         <members>RollbarNotInitializedException</members>
 
         <!-- tests -->
@@ -21,6 +24,8 @@
         <members>DataBuilderTest</members>
         <members>ExceptionEmailParserTest</members>
         <members>NotifierTest</members>
+        <members>MetadataServiceTest</members>
+        <members>RollbarConfigureControllerTest</members>
         <members>RollbarTest</members>
 
         <!-- test helpers -->
@@ -29,7 +34,7 @@
     </types>
 
     <types>
-        <members>remotesitehelper</members>
+        <members>RemoteSiteHelper</members>
         <name>ApexComponent</name>
     </types>
 </Package>
