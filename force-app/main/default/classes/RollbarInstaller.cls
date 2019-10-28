@@ -161,6 +161,9 @@ public with sharing class RollbarInstaller {
 
     public static Boolean rollbarEmailServiceSetUp()
     {
+        // TODO: remove when installation is finished
+        return true;
+        
         try {
             EmailServicesFunction emailFunction = [SELECT Id FROM EmailServicesFunction WHERE FunctionName='RollbarEmailService'];
             EmailServicesAddress emailServicesAddress = [SELECT Id, LocalPart, EmailDomainName FROM EmailServicesAddress WHERE FunctionId = :emailFunction.Id];
@@ -173,6 +176,9 @@ public with sharing class RollbarInstaller {
 
     public static Boolean apexNotificationsForwardingSetUp()
     {
+        // TODO: remove when installation is finished
+        return true;
+        
         EmailServicesFunction emailFunction;
         EmailServicesAddress emailServicesAddress;
         try {
