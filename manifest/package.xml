@@ -37,9 +37,4 @@
         <members>RollbarInstallationCheck</members>
         <name>ApexPage</name>
     </types>
-
-    <types>
-        <members>RollbarSettings__c</members>
-        <name>CustomObject</name>
-    </types>
 </Package>
