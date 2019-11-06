@@ -22,7 +22,6 @@ global class RemoteSiteHelperController {
 			if(RemoteSiteHelperController.LastMetadataAPIConnectionException!=null)
 				MetadataApiException = RemoteSiteHelperController.LastMetadataAPIConnectionException.getMessage();
 		}
-		
 	}
 	
 	public PageReference displayMetadataResponse()

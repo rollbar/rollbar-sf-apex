@@ -37,7 +37,13 @@ public with sharing class RollbarConfigureController {
 
     public Pagereference check()
     {
-        Config config = new Config(this.accessToken, UserInfo.getOrganizationId());
+        Config config;
+
+        try {
+            config = new Config(this.accessToken, UserInfo.getOrganizationId());
+        } catch(RollbarNotInitializedException ex) {
+            return null;
+        }
 
         this.checks = RollbarInstaller.check(config);
 
@@ -45,7 +51,6 @@ public with sharing class RollbarConfigureController {
         for (String key : this.checks.keySet()) {
             if (!this.checks.get(key)) {
                 installed = false;
-                break;
             }
         }
         this.installed = installed;

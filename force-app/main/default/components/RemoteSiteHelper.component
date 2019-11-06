@@ -58,7 +58,7 @@
     </script>
 
     <apex:outputPanel rendered="{!MetadataConnectionWarning}">
-        <script>createRemoteSite();</script>
+        <!-- <script>createRemoteSite();</script> -->
     </apex:outputPanel>
     
     <apex:form id="myForm">
