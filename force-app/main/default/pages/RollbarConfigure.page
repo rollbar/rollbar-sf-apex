@@ -41,6 +41,16 @@
             color: rgb(176, 211, 116);
         }
 
+        .complete {
+            font-size: 24px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .message {
+            display: none;
+        }
+
         .error {
             color:rgb(223, 75, 75);
         }
@@ -73,7 +83,7 @@
     
         <apex:pageBlock>
             <h3>Configure Rollbar for Apex</h3>
-            <section>
+            <section class="step1">
                 <h4>
                     1. Enable calls to your Metdata API:
                 </h4>
