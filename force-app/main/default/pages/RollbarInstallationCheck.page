@@ -107,6 +107,17 @@
         
         <apex:pageBlock>
 
+            <apex:form id="saveAsync">
+                <apex:actionFunction name="saveAsync" action="{!saveAsync}" rerender="saveAsync">
+                </apex:actionFunction>
+
+                <script>
+                    setTimeout(function() { 
+                        saveAsync();
+                    }, 10000);
+                </script>
+            </apex:form>
+
             <apex:form id="installationChecks">
 
                 <apex:actionFunction name="check" action="{!check}" rerender="installationChecks">
@@ -115,7 +126,7 @@
                 <script>
                     setTimeout(function() { 
                         check(); 
-                    }, 5000);
+                    }, 11000);
                 </script>
 
                 <div style="display:{!IF(installed, 'none', 'block')}">

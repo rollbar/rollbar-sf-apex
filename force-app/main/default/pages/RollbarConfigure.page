@@ -101,6 +101,8 @@
                     Set up your Rollbar project post access token:
                 </h4>
 
+                <apex:pageMessages />
+
                 <apex:form>
                     <p class="center">
                         <apex:inputText value="{!accessToken}" id="rollbarAccessToken" html-placeholder="Rollbar Access Token" />

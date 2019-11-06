@@ -1,6 +1,6 @@
 public with sharing class Config {
     public Config(String accessToken, String environment) {
-        if (accessToken.length() == 0 || accessToken == '') {
+        if (accessToken == null || accessToken.length() == 0 || accessToken == '') {
             throw new RollbarNotInitializedException();
         }
         this.accessToken = accessToken;
