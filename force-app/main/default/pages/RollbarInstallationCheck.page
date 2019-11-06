@@ -131,9 +131,7 @@
                                 <span class="checkmark success">✓</span>
                             </apex:outputPanel>
                             <apex:outputPanel rendered="{! !checks['metadataApiAllowed']}">
-                                <span>
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Ajax_loader_metal_512.gif" width="10" height="10" />
-                                </span>
+                                in progress ...
                             </apex:outputPanel>
                         </li>
                         <li>
@@ -142,9 +140,7 @@
                                 <span class="checkmark success">✓</span>
                             </apex:outputPanel>
                             <apex:outputPanel rendered="{! !checks['rollbarApiEndpointAllowed']}">
-                                <span>
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Ajax_loader_metal_512.gif" width="10" height="10" />
-                                </span>
+                                in progress ...
                             </apex:outputPanel>
                         </li>
                         <li>
@@ -153,9 +149,7 @@
                                 <span class="checkmark success">✓</span>
                             </apex:outputPanel>
                             <apex:outputPanel rendered="{! !checks['rollbarPingSuccessful']}">
-                                <span>
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Ajax_loader_metal_512.gif" width="10" height="10" />
-                                </span>
+                                in progress ...
                             </apex:outputPanel>
                         </li>
                         <li>Rollbar Email Service set up:
@@ -163,9 +157,7 @@
                                 <span class="checkmark success">✓</span>
                             </apex:outputPanel>
                             <apex:outputPanel rendered="{! !checks['rollbarEmailServiceSetUp']}">
-                                <span>
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Ajax_loader_metal_512.gif" width="10" height="10" />
-                                </span>
+                                in progress ...
                             </apex:outputPanel>
                         </li>
                         <li>Apex Notifications forwarding set up:
@@ -173,9 +165,7 @@
                                 <span class="checkmark success">✓</span>
                             </apex:outputPanel>
                             <apex:outputPanel rendered="{! !checks['apexNotificationsForwardingSetUp']}">
-                                <span>
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Ajax_loader_metal_512.gif" width="10" height="10" />
-                                </span>
+                                in progress ...
                             </apex:outputPanel>
                         </li>
                         <li>Access Token correct:
@@ -183,9 +173,7 @@
                                 <span class="checkmark success">✓</span>
                             </apex:outputPanel>
                             <apex:outputPanel rendered="{! !checks['accessTokenCorrect']}">
-                                <span>
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Ajax_loader_metal_512.gif" width="10" height="10" />
-                                </span>
+                                in progress ...
                             </apex:outputPanel>
                         </li>
                     </ul>
