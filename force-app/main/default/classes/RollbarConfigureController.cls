@@ -20,6 +20,26 @@ public with sharing class RollbarConfigureController {
 
     public Pagereference save()
     {
+        
+        Config config;
+        
+        try {
+            config = new Config(this.accessToken, UserInfo.getOrganizationId());
+        } catch(RollbarNotInitializedException ex) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.Error, 'Provided access token is incorrect.'));
+            return (new PageReference('/apex/RollbarConfigure')).setRedirect(true);
+        }
+
+        RollbarInstaller.install(config);
+
+        PageReference checkPage = new PageReference('/apex/RollbarInstallationCheck');
+        checkPage.setRedirect(true);
+        return checkPage;
+    }
+
+    public Pagereference saveAsync()
+    {
+        
         Config config;
         
         try {
@@ -30,14 +50,18 @@ public with sharing class RollbarConfigureController {
 
         RollbarInstaller.install(config);
 
-        PageReference checkPage = new PageReference('/apex/RollbarInstallationCheck');
-        checkPage.setRedirect(true);
-        return checkPage;
+        return null;
     }
 
     public Pagereference check()
     {
-        Config config = new Config(this.accessToken, UserInfo.getOrganizationId());
+        Config config;
+
+        try {
+            config = new Config(this.accessToken, UserInfo.getOrganizationId());
+        } catch(RollbarNotInitializedException ex) {
+            return null;
+        }
 
         this.checks = RollbarInstaller.check(config);
 
@@ -45,7 +69,6 @@ public with sharing class RollbarConfigureController {
         for (String key : this.checks.keySet()) {
             if (!this.checks.get(key)) {
                 installed = false;
-                break;
             }
         }
         this.installed = installed;

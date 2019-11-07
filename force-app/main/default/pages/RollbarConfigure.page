@@ -1,4 +1,7 @@
 <apex:page controller="RollbarConfigureController" action="{!check}">
+    <head>
+        <title>Install Rollbar for Apex</title>
+    </head>
     <style>
         body, html {
             background-image: radial-gradient(circle at 50% 66%,#0c84d2,#104c91);
@@ -29,6 +32,7 @@
         .content {
             width: 50%;
             margin: 0 auto;
+            text-align: center;
         }
 
         .header {
@@ -39,6 +43,16 @@
 
         .success {
             color: rgb(176, 211, 116);
+        }
+
+        .complete {
+            font-size: 24px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .message {
+            display: none;
         }
 
         .error {
@@ -72,8 +86,8 @@
 
     
         <apex:pageBlock>
-            <h3>Configure Rollbar for Apex</h3>
-            <section>
+            <!-- <h3>Configure Rollbar for Apex</h3>
+            <section class="step1">
                 <h4>
                     1. Enable calls to your Metdata API:
                 </h4>
@@ -81,11 +95,13 @@
                                     rssDescription="SFDC to SFDC metadata api."
                                     pageOverview="Rollbar for Apex requires allowing calls to your organization's Metdata API endpoint."
                 />
-            </section>
+            </section> -->
             <section>
                 <h4>
-                    2. Set up your Rollbar project post access token:
+                    Set up your Rollbar project post access token:
                 </h4>
+
+                <apex:pageMessages />
 
                 <apex:form>
                     <p class="center">
