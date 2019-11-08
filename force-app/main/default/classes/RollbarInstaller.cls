@@ -51,8 +51,6 @@ public with sharing class RollbarInstaller {
 
         RollbarInstaller.enableRollbarApiCalls(config.endpoint());
 
-        // TODO: the tooling and the metadataapi are one - just make sure the domain is whitelisted
-
         RollbarInstaller.enableApexNotificationsForwarding();
     }
 
