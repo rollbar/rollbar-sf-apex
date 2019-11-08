@@ -64,7 +64,7 @@ public with sharing class Rollbar {
     {
         Rollbar instance = Rollbar.instance();
         if (!instance.initialized) {
-            throw new RollbarNotInitializedException('Rollbar has not been initialized');
+            Rollbar.init();
         }
 
         return instance;
