@@ -24,7 +24,7 @@ public with sharing class Rollbar {
     {
         return Rollbar.init(
             RollbarSettings__c.getInstance().AccessToken__c,
-            UserInfo.getOrganizationId()
+            UserInfo.getOrganizationName()
         );
     }
 
