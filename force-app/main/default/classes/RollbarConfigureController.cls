@@ -43,7 +43,7 @@ public with sharing class RollbarConfigureController {
         Config config;
         
         try {
-            config = new Config(this.accessToken, UserInfo.getOrganizationId());
+            config = new Config(this.accessToken, UserInfo.getOrganizationName());
         } catch(RollbarNotInitializedException ex) {
             return null;
         }
@@ -58,7 +58,7 @@ public with sharing class RollbarConfigureController {
         Config config;
 
         try {
-            config = new Config(this.accessToken, UserInfo.getOrganizationId());
+            config = new Config(this.accessToken, UserInfo.getOrganizationName());
         } catch(RollbarNotInitializedException ex) {
             return null;
         }
