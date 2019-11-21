@@ -104,12 +104,12 @@
                         element.onclick = function() { toggleAction(this, action, interval); return false; };
                     }
                 </script>
-                
-                <apex:outputPanel id="emulateUsersInBackground">
-                    {!emulateUsersMsg}
-                </apex:outputPanel>
 
                 <button class="emulateUsersInBackground">Start emulating users</button>
+                <apex:outputPanel id="emulateUsersInBackground">
+                    <span style="color: red">{!emulateUsersMsg}</span>
+                </apex:outputPanel>
+
                 <apex:actionFunction name="emulateUsersInBackground" action="{!emulateUsersInBackground}" rerender="emulateUsersInBackground"></apex:actionFunction>
 
                 <script>
@@ -121,8 +121,7 @@
                         500
                     );
                 </script>
-            </apex:pageBlockSection>
-            <apex:pageBlockSection>
+
                 <div id="sendApexExceptionNotificationInBackground"></div>
                 <apex:actionFunction name="sendApexExceptionNotificationInBackground" action="{!sendApexExceptionNotificationInBackground}" rerender="sendApexExceptionNotificationInBackground">
                 </apex:actionFunction>
