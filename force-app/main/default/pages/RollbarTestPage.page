@@ -64,6 +64,77 @@
             <apex:pageBlockSection>
                 <apex:commandButton action="{!testUnhadledException}" value="Run" />
                 <apex:commandButton action="{!sendApexExceptionNotification}" value="Send Apex Notification Manually" />
+                <apex:actionFunction name="sendApexExceptionNotification" action="{!sendApexExceptionNotification}" rerender="sendApexExceptionNotification"></apex:actionFunction>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Emulate App Users">
+                <p>The following example emulates behavior of users triggering one of multiple actions available in an example Salesforce app.</p>
+                <p>All of these actions include buggy code causing errors in the app.</p>
+                <p>Errors caused by emulated users should get reported to the associated Rollbar account.</p>
+            <apex:pageBlockSection>
+            </apex:pageBlockSection>
+                <script>
+                    function toggleAction(element, action, interval) {
+                        if (element.actionOn == undefined) {
+                            element.actionOn =  true;
+                            element.originalText = element.innerHTML;
+                        }
+
+                        element.actionOn = !element.actionOn;
+
+                        var continousAction = function(action, interval) {
+                            setTimeout(function() {
+
+                                if (!element.actionOn) {
+                                    return;
+                                }
+
+                                action();
+                                continousAction(action, interval);
+
+                            }, interval);
+                        };
+
+                        if (element.actionOn) {
+                            element.innerHTML = 'Stop';
+                            continousAction(action, interval);
+                        } else {
+                            element.innerHTML = element.originalText;
+                        }
+
+                        element.onclick = function() { toggleAction(this, action, interval); return false; };
+                    }
+                </script>
+                
+                <apex:outputPanel id="emulateUsersInBackground">
+                    {!emulateUsersMsg}
+                </apex:outputPanel>
+                <button class="emulateUsersInBackground">Start emulating users</button>
+                <apex:actionFunction name="emulateUsersInBackground" action="{!emulateUsersInBackground}" rerender="emulateUsersInBackground"></apex:actionFunction>
+
+                <script>
+                    toggleAction(
+                        document.getElementsByClassName('emulateUsersInBackground')[0],
+                        function() {
+                            console.log(emulateUsersInBackground());
+                        },
+                        500
+                    );
+                </script>
+
+                <div id="sendApexExceptionNotificationInBackground"></div>
+                <apex:actionFunction name="sendApexExceptionNotificationInBackground" action="{!sendApexExceptionNotificationInBackground}" rerender="sendApexExceptionNotificationInBackground">
+                </apex:actionFunction>
+                <button class="toggleSendingApexExceptionNotifications">Start sending Apex Exception Notifications</button>
+
+                <script>
+                    toggleAction(
+                        document.getElementsByClassName('toggleSendingApexExceptionNotifications')[0],
+                        function() {
+                            sendApexExceptionNotificationInBackground();
+                        },
+                        3000
+                    );
+                </script>
             </apex:pageBlockSection>
         </apex:pageBlock>
     </apex:form>

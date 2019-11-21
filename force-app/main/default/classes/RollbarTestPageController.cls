@@ -1,4 +1,7 @@
 public with sharing class RollbarTestPageController {
+
+    public String emulateUsersMsg { get; set; }
+
     public RollbarTestPageController() {
 
     }
@@ -37,9 +40,11 @@ public with sharing class RollbarTestPageController {
         return null;
     }
 
-    public void sendApexExceptionNotification() {
+    public Pagereference sendApexExceptionNotification() {
         Messaging.SingleEmailMessage message = new Messaging.SingleEmailMessage();
-        message.toAddresses = new String[] { 'rollbaremailservice@2my1sei6hsps5lb9mk19i6pcs6rgojf2drlc44ubduzh0ups3b.2e-mc3puaq.na91.apex.salesforce.com' };
+        String wrong = null;
+        wrong.length();
+        message.toAddresses = new String[] { 'rollbaremailservice@10k3q3i5i9b2p119xg21u65u5g32rfldv4k1u79cr5ukyjh72d.1h-5a5meaa.cs79.apex.sandbox.salesforce.com' };
         message.subject = 'Developer script exception from Rollbar, Inc. : RollbarTestPageController : Attempt to de-reference a null object';
         message.plainTextBody = 'Apex script unhandled exception by user/organization: 0052E00000Hy7Kg/00D2E000000mc3P\n' +
                                 '\n' +
@@ -55,6 +60,63 @@ public with sharing class RollbarTestPageController {
                                 
         Messaging.SingleEmailMessage[] messages = new List<Messaging.SingleEmailMessage> {message};
         Messaging.SendEmailResult[] results = Messaging.sendEmail(messages);
+
+        return null;
+    }
+
+    public Pagereference sendApexExceptionNotificationInBackground() {
+        RollbarTestPageController.sendApexExceptionNotificationFuture();
+        return null;
+    }
+
+    @future(callout=true)
+    public static void sendApexExceptionNotificationFuture() {
+        RollbarTestPageController controller = new RollbarTestPageController();
+        controller.sendApexExceptionNotification();
+    }
+
+    public Pagereference emulateUsersInBackground() {
+        String action = emulateUserAction();
+        emulateUsersMsg = action;
+        return null;
+    }
+
+    public String emulateUserAction() {
+        String now = Datetime.now().format('HH:mm:ss');
+
+        switch on (Math.ceil(Math.random() * 3.00).intValue()) {
+            when 1 {
+                RollbarTestPageController.testLogExceptionNoRollbarFuture();
+                return '[' + now + '] User has tried building buggy version data object.';
+            }
+            when 2 {
+                RollbarTestPageController.testUnhadledExceptionFuture();
+                return '[' + now + '] User has tried to get a length of a buggy String object.';
+            }
+            when 3 {
+                RollbarTestPageController.testNoRowsForAssignment();
+                return '[' + now + '] User has tried to fetch a single account information from a multiple accounts query statement.';
+            }
+        }
+
+        return '';
+    }
+
+    @future
+    public static void testLogExceptionNoRollbarFuture() {
+        RollbarTestPageController controller = new RollbarTestPageController();
+        controller.testLogExceptionNoRollbar();
+    }
+
+    @future
+    public static void testUnhadledExceptionFuture() {
+        RollbarTestPageController controller = new RollbarTestPageController();
+        controller.testUnhadledException();
+    }
+
+    @future
+    public static void testNoRowsForAssignment() {
+        Account accounts = [SELECT Id FROM Account];
     }
 
     public Map<String, String> buildData()
