@@ -108,6 +108,7 @@
                 <apex:outputPanel id="emulateUsersInBackground">
                     {!emulateUsersMsg}
                 </apex:outputPanel>
+
                 <button class="emulateUsersInBackground">Start emulating users</button>
                 <apex:actionFunction name="emulateUsersInBackground" action="{!emulateUsersInBackground}" rerender="emulateUsersInBackground"></apex:actionFunction>
 
@@ -120,7 +121,8 @@
                         500
                     );
                 </script>
-
+            </apex:pageBlockSection>
+            <apex:pageBlockSection>
                 <div id="sendApexExceptionNotificationInBackground"></div>
                 <apex:actionFunction name="sendApexExceptionNotificationInBackground" action="{!sendApexExceptionNotificationInBackground}" rerender="sendApexExceptionNotificationInBackground">
                 </apex:actionFunction>

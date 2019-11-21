@@ -41,10 +41,13 @@ public with sharing class RollbarTestPageController {
     }
 
     public Pagereference sendApexExceptionNotification() {
+
+        EmailServicesFunction emailFunction = [SELECT Id FROM EmailServicesFunction WHERE FunctionName='RollbarEmailService'];
+        EmailServicesAddress emailServicesAddress = [SELECT Id, LocalPart, EmailDomainName FROM EmailServicesAddress WHERE FunctionId = :emailFunction.Id];
+        String rollbarEmailService = emailServicesAddress.LocalPart + '@' + emailServicesAddress.EmailDomainName;
+
         Messaging.SingleEmailMessage message = new Messaging.SingleEmailMessage();
-        String wrong = null;
-        wrong.length();
-        message.toAddresses = new String[] { 'rollbaremailservice@10k3q3i5i9b2p119xg21u65u5g32rfldv4k1u79cr5ukyjh72d.1h-5a5meaa.cs79.apex.sandbox.salesforce.com' };
+        message.toAddresses = new String[] { rollbarEmailService };
         message.subject = 'Developer script exception from Rollbar, Inc. : RollbarTestPageController : Attempt to de-reference a null object';
         message.plainTextBody = 'Apex script unhandled exception by user/organization: 0052E00000Hy7Kg/00D2E000000mc3P\n' +
                                 '\n' +
