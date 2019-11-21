@@ -1,13 +1,24 @@
 <!-- /apex/RollbarTestPage -->
 <apex:page controller="RollbarTestPageController" title="Rollbar Apex Reporting Examples">
-    <h1>Rollbar Test Page</h1>
+    <style>
+        code {
+            background: #333;
+            color: white;
+            display: block;
+            padding: 2em;
+            line-height: 1.5em;
+        }
+    </style>
+    <apex:sectionHeader title="Rollbar Demo" subtitle="Helping Salesforce developers iterate faster"/>
     <apex:form>
-        <apex:pageBlock title="Examples">
+        <apex:pageBlock title="Click-and-go Examples">
             <apex:pageBlockSection title="Report an arbitrary string message">
                 <code>
                     Rollbar.log('info', 'Hello world from my Salesforce org');
                 </code>
                 <p>Report a string "Hello world from my Salesforce org" to Rollbar.</p>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection>
                 <apex:commandButton action="{!testLogMessage}" value="Run" />
             </apex:pageBlockSection>
             <apex:pageBlockSection title="Report an exception with a stack trace">
@@ -66,10 +77,37 @@
                 <apex:commandButton action="{!sendApexExceptionNotification}" value="Send Apex Notification Manually" />
                 <apex:actionFunction name="sendApexExceptionNotification" action="{!sendApexExceptionNotification}" rerender="sendApexExceptionNotification"></apex:actionFunction>
             </apex:pageBlockSection>
+        </apex:pageBlock>
+        <apex:pageBlock title="Full Featured Examples">
             <apex:pageBlockSection title="Emulate a buggy Salesforce app">
                 <p>The following example emulates behavior of users triggering one of multiple actions available in an example Salesforce app.</p>
                 <p>All of these actions include buggy code causing errors in the app.</p>
                 <p>Errors caused by emulated users should get reported to the associated Rollbar account.</p>
+
+
+                <p><strong>User #1: building buggy version data object</strong></p>
+                <p><code>
+                    String version = null;<br />
+                    if (version.length() == 0) {<br />
+                        version = this.getMajor() +<br />
+                            &#x27;.&#x27; +<br />
+                            this.getMinor() +<br />
+                            &#x27;.&#x27; +<br />
+                            this.getPatch();<br />
+                    }<br />
+                    return version;
+                </code></p>
+
+                <p><strong>User #2: getting a non-existent element of an array</strong></p>
+                <p><code>
+                    String[] collection = new String[] {};<br />
+                    String single = collection[3];
+                </code></p>
+
+                <p><strong>Use case #3: fetching a single account information from a multiple accounts query statement</strong></p>
+                <p><code>
+                    Account accounts = [SELECT Id FROM Account];
+                </code></p>
             <apex:pageBlockSection>
             </apex:pageBlockSection>
                 <script>
@@ -121,6 +159,9 @@
                         500
                     );
                 </script>
+
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Apex Notification Emails Stream">
 
                 <div id="sendApexExceptionNotificationInBackground"></div>
                 <apex:actionFunction name="sendApexExceptionNotificationInBackground" action="{!sendApexExceptionNotificationInBackground}" rerender="sendApexExceptionNotificationInBackground">
