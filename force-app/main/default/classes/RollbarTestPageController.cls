@@ -6,14 +6,26 @@ public with sharing class RollbarTestPageController {
 
     }
 
-    public PageReference testUnhadledException() {
+    public void dereferenceNull() {
         String myString = null;
         myString.length();
+    }
+
+    public void indexOutOfBounds() {
+        String[] collection = new String[] {};
+        String single = collection[3];
+    }
+
+    public void noRowsForAssignment() {
+        Account accounts = [SELECT Id FROM Account];
+    }
+
+    public PageReference testUnhadledException() {
+        dereferenceNull();
         return null;
     }
 
     public PageReference testLogMessage() {
-        Rollbar.init();
         Rollbar.log('info', 'Hello world from my Salesforce org');
         return null;
     }
@@ -24,7 +36,6 @@ public with sharing class RollbarTestPageController {
     }
 
     public Pagereference testLogException() {
-        Rollbar.init();
         try {
             this.buildData();
         } catch(Exception ex) {
@@ -89,12 +100,12 @@ public with sharing class RollbarTestPageController {
 
         switch on (Math.ceil(Math.random() * 3.00).intValue()) {
             when 1 {
-                RollbarTestPageController.testLogExceptionNoRollbarFuture();
+                RollbarTestPageController.testBuildDataFuture();
                 return '[' + now + '] User has tried building buggy version data object.';
             }
             when 2 {
-                RollbarTestPageController.testUnhadledExceptionFuture();
-                return '[' + now + '] User has tried to get a length of a buggy String object.';
+                RollbarTestPageController.testIndexOutOfBoundsFuture();
+                return '[' + now + '] User has tried to get a non-existent element of an array';
             }
             when 3 {
                 RollbarTestPageController.testNoRowsForAssignment();
@@ -106,20 +117,21 @@ public with sharing class RollbarTestPageController {
     }
 
     @future
-    public static void testLogExceptionNoRollbarFuture() {
+    public static void testBuildDataFuture() {
         RollbarTestPageController controller = new RollbarTestPageController();
-        controller.testLogExceptionNoRollbar();
+        controller.buildData();
     }
 
     @future
-    public static void testUnhadledExceptionFuture() {
+    public static void testIndexOutOfBoundsFuture() {
         RollbarTestPageController controller = new RollbarTestPageController();
-        controller.testUnhadledException();
+        controller.indexOutOfBounds();
     }
 
     @future
     public static void testNoRowsForAssignment() {
-        Account accounts = [SELECT Id FROM Account];
+        RollbarTestPageController controller = new RollbarTestPageController();
+        controller.noRowsForAssignment();
     }
 
     public Map<String, String> buildData()
