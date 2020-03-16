@@ -26,15 +26,19 @@
         <members>MetadataServiceTest</members>
         <members>RollbarConfigureControllerTest</members>
         <members>RollbarTest</members>
+        <members>RollbarTestController</members>
 
         <!-- test helpers -->
         <members>RollbarApiCalloutMock</members>
-        <members>DataBuilderTestException</members>    
+        <members>DataBuilderTestException</members>
     </types>
 
     <types>
+        <name>ApexPage</name>
         <members>RollbarConfigure</members>
         <members>RollbarInstallationCheck</members>
-        <name>ApexPage</name>
+
+        <!-- test pages -->
+        <members>RollbarTest</members>
     </types>
 </Package>
