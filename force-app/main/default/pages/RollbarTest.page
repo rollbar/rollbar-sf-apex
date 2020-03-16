@@ -1,0 +1,7 @@
+<apex:page controller="RollbarTestController">
+    <h1>Rollbar Test</h1>
+    <p>Press the button below to cause an exception.</p>
+    <apex:form >
+        <apex:commandButton action="{!test}" value="Throw exception" />
+    </apex:form>
+</apex:page>
