@@ -10,7 +10,7 @@
  * 3. Add Salesforce-generated email address from the added email service to `Apex Exception Email` addresses.
         Leave `Accept Email From` field empty.
  */
-public with sharing class Rollbar {
+global with sharing class Rollbar {
 
     public static Rollbar instance() {
         if (Rollbar.instance == null) {
@@ -40,22 +40,22 @@ public with sharing class Rollbar {
         return instance;
     }
 
-    public static HttpResponse log(String level, String message) {
+    global static HttpResponse log(String level, String message) {
         Rollbar instance = initializedInstance();
         return instance.notifier.log(level, message);
     }
 
-    public static HttpResponse log(Exception exc) {
+    global static HttpResponse log(Exception exc) {
         Rollbar instance = initializedInstance();
         return instance.notifier.log(exc);
     }
 
-    public static HttpResponse log(Exception exc, Map<String, Object> custom) {
+    global static HttpResponse log(Exception exc, Map<String, Object> custom) {
         Rollbar instance = initializedInstance();
         return instance.notifier.log(exc, custom);
     }
 
-    public static HttpResponse log(ExceptionData exData) {
+    global static HttpResponse log(ExceptionData exData) {
         Rollbar instance = initializedInstance();
         return instance.notifier.log(exData);
     }
