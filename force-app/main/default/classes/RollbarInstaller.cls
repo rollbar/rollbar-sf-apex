@@ -1,5 +1,5 @@
 public with sharing class RollbarInstaller {
-    
+
     public static Map<String, Boolean> check(Config config)
     {
         Map<String, Boolean> checks = new Map<String, Boolean>();
@@ -27,7 +27,7 @@ public with sharing class RollbarInstaller {
         } catch (Exception ex) {
             checks.put('rollbarEmailServiceSetUp', false);
         }
-        
+
         try {
             checks.put('apexNotificationsForwardingSetUp', apexNotificationsForwardingSetUp());
         } catch (Exception ex) {
@@ -75,24 +75,24 @@ public with sharing class RollbarInstaller {
         req.setHeader('SOAPAction', '""');
         req.setHeader('Content-Type', 'text/xml');
         req.setBody(
-            '<?xml version="1.0" encoding="utf-8"?>' + 
+            '<?xml version="1.0" encoding="utf-8"?>' +
             '<env:Envelope xmlns:env="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'+
-                '<env:Header>' + 
-                    '<urn:SessionHeader xmlns:urn="http://soap.sforce.com/2006/04/metadata">' + 
-                        '<urn:sessionId>'+UserInfo.getSessionId()+'</urn:sessionId>' + 
-                    '</urn:SessionHeader>' + 
-                '</env:Header>' + 
+                '<env:Header>' +
+                    '<urn:SessionHeader xmlns:urn="http://soap.sforce.com/2006/04/metadata">' +
+                        '<urn:sessionId>'+UserInfo.getSessionId()+'</urn:sessionId>' +
+                    '</urn:SessionHeader>' +
+                '</env:Header>' +
                 '<env:Body>' +
-                    '<createMetadata xmlns="http://soap.sforce.com/2006/04/metadata">' + 
-                        '<metadata xsi:type="RemoteSiteSetting">' + 
-                            '<fullName>MetadataAPI</fullName>' + 
-                            '<description>SFDC to SFDC metadata api.</description>' + 
-                            '<disableProtocolSecurity>false</disableProtocolSecurity>' + 
-                            '<isActive>true</isActive>' + 
+                    '<createMetadata xmlns="http://soap.sforce.com/2006/04/metadata">' +
+                        '<metadata xsi:type="RemoteSiteSetting">' +
+                            '<fullName>MetadataAPI</fullName>' +
+                            '<description>SFDC to SFDC metadata api.</description>' +
+                            '<disableProtocolSecurity>false</disableProtocolSecurity>' +
+                            '<isActive>true</isActive>' +
                             '<url>'+service.endpoint_x+'</url>' +
                         '</metadata>' +
                     '</createMetadata>' +
-                '</env:Body>' + 
+                '</env:Body>' +
             '</env:Envelope>'
         );
 
@@ -117,35 +117,11 @@ public with sharing class RollbarInstaller {
 
     public static String createEmailService()
     {
-        MetadataService.EmailServicesFunction emailService = new MetadataService.EmailServicesFunction();
-        emailService.fullName = 'RollbarEmailService';
-        emailService.functionName = 'RollbarEmailService';
-        emailService.apexClass = 'RollbarExceptionEmailHandler';
-        emailService.isActive = true;
-        emailService.attachmentOption = 'None';
-        emailService.authenticationFailureAction = 'Discard';
-        emailService.authorizationFailureAction = 'Discard';
-        // TODO: authorizedSenders might have to be set up for security
-        // emailServicesAddresses.
-        emailService.functionInactiveAction = 'Discard';
-        emailService.overLimitAction = 'Discard';
-        emailService.isAuthenticationRequired = false;
-        emailService.isErrorRoutingEnabled = false;
-        emailService.isTextAttachmentsAsBinary = false;
-        emailService.isTlsRequired = false;
+        EmailServiceInstaller.createEmailServiceFunction();
+        EmailServiceInstaller.createEmailServiceAddress();
 
-        MetadataService.EmailServicesAddress emailServiceAddress = new MetadataService.EmailServicesAddress();
-        emailServiceAddress.developerName = 'rollbar';
-        emailServiceAddress.isActive = true;
-        emailServiceAddress.localPart = 'rollbarEmailService';
-        emailServiceAddress.runAsUser = UserInfo.getUserName();
-        // TODO: set up authrizedSender for security
-        // emailServiceAddress.authorizedSenders
-
-        MetadataService.createEmailService(emailService, new List<MetadataService.EmailServicesAddress> { emailServiceAddress });
-
-        EmailServicesFunction emailFunction = [SELECT Id FROM EmailServicesFunction WHERE FunctionName=:emailService.fullName];
-        EmailServicesAddress emailServicesAddress = [SELECT Id, LocalPart, EmailDomainName FROM EmailServicesAddress WHERE FunctionId = :emailFunction.Id];
+        Id emailFunctionId = EmailServiceInstaller.serviceId();
+        EmailServicesAddress emailServicesAddress = [SELECT Id, LocalPart, EmailDomainName FROM EmailServicesAddress WHERE FunctionId = :emailFunctionId];
 
         return emailServicesAddress.LocalPart + '@' + emailServicesAddress.EmailDomainName;
     }
@@ -182,7 +158,7 @@ public with sharing class RollbarInstaller {
         }
 
         MetadataService.RemoteSiteSetting setting = (MetadataService.RemoteSiteSetting)result.getRecords()[0];
-        
+
         if (setting.fullName != 'RollbarAPI') {
             return false;
         }
@@ -212,7 +188,7 @@ public with sharing class RollbarInstaller {
             EmailServicesFunction emailFunction = [SELECT Id FROM EmailServicesFunction WHERE FunctionName='RollbarEmailService'];
             EmailServicesAddress emailServicesAddress = [SELECT Id, LocalPart, EmailDomainName FROM EmailServicesAddress WHERE FunctionId = :emailFunction.Id];
         } catch (Exception ex) {
-            return false;    
+            return false;
         }
 
         return true;
@@ -226,7 +202,7 @@ public with sharing class RollbarInstaller {
             emailFunction = [SELECT Id FROM EmailServicesFunction WHERE FunctionName='RollbarEmailService'];
             emailServicesAddress = [SELECT Id, LocalPart, EmailDomainName FROM EmailServicesAddress WHERE FunctionId = :emailFunction.Id];
         } catch (Exception ex) {
-            return false;    
+            return false;
         }
 
         String emailServiceAddress = emailServicesAddress.LocalPart + '@' + emailServicesAddress.EmailDomainName;
@@ -256,11 +232,11 @@ public with sharing class RollbarInstaller {
 			MetadataService.MetadataPort service = new MetadataService.MetadataPort();
 			service.SessionHeader = new MetadataService.SessionHeader_element();
 			service.SessionHeader.sessionId = UserInfo.getSessionId();
-			List<MetadataService.ListMetadataQuery> queries = new List<MetadataService.ListMetadataQuery>();		
+			List<MetadataService.ListMetadataQuery> queries = new List<MetadataService.ListMetadataQuery>();
 			MetadataService.ListMetadataQuery remoteSites = new MetadataService.ListMetadataQuery();
 			remoteSites.type_x = 'RemoteSiteSetting';
-			queries.add(remoteSites);					
-			service.listMetadata(queries, 28);			
+			queries.add(remoteSites);
+			service.listMetadata(queries, 28);
 		} catch (Exception e) {
 			return false;
 		}
