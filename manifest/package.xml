@@ -16,6 +16,7 @@
         <members>RollbarConfigureController</members>
         <members>RollbarExceptionEmailHandler</members>
         <members>RollbarInstaller</members>
+        <members>EmailServiceInstaller</members>
         <members>RollbarNotInitializedException</members>
 
         <!-- tests -->
@@ -29,7 +30,7 @@
 
         <!-- test helpers -->
         <members>RollbarApiCalloutMock</members>
-        <members>DataBuilderTestException</members>    
+        <members>DataBuilderTestException</members>
     </types>
 
     <types>
