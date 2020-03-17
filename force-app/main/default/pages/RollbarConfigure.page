@@ -1,4 +1,4 @@
-<apex:page controller="RollbarConfigureController" action="{!check}">
+<apex:page controller="RollbarConfigureController">
     <head>
         <title>Install Rollbar for Apex</title>
     </head>
@@ -84,16 +84,16 @@
         </div>
 
 
-    
+
         <apex:pageBlock>
             <!-- <h3>Configure Rollbar for Apex</h3>
             <section class="step1">
                 <h4>
-                    1. Enable calls to your Metdata API:
+                    1. Enable calls to your Metadata API:
                 </h4>
                 <c:remotesitehelper rssName="mdapi"
                                     rssDescription="SFDC to SFDC metadata api."
-                                    pageOverview="Rollbar for Apex requires allowing calls to your organization's Metdata API endpoint."
+                                    pageOverview="Rollbar for Apex requires allowing calls to your organization's Metadata API endpoint."
                 />
             </section> -->
             <section>

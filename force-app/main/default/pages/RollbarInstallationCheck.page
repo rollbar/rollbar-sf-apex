@@ -1,4 +1,4 @@
-<apex:page controller="RollbarConfigureController" action="{!check}">
+<apex:page controller="RollbarConfigureController">
     <head>
         <title>Install Rollbar for Apex</title>
     </head>
@@ -8,67 +8,67 @@
                 height: 100%;
                 color: #fff
             }
-    
+
             h3 {
                 font-size: 24px;
             }
-    
+
             h4 {
                 font-size: 16px;
             }
-    
+
             .section, .next-step {
                 margin-top: 2em;
             }
-    
+
             .next-step {
                 text-align: center;
             }
-    
+
             header {
                 text-align: center;
             }
-    
+
             .content {
                 width: 50%;
                 margin: 0 auto;
                 text-align: center;
             }
-    
+
             .header {
                 margin: 0 auto;
                 width: 414px;
                 margin-bottom: 2em;
             }
-    
+
             .success {
                 color: rgb(176, 211, 116);
             }
-    
+
             .complete {
                 font-size: 24px;
                 text-align: center;
                 margin-top: 20px;
             }
-    
+
             .message {
                 display: none;
             }
-    
+
             .error {
                 color:rgb(223, 75, 75);
             }
-    
+
             input {
                 padding: 10px !important;
                 font-size: 24px !important;
                 border: none !important;
             }
-    
+
             .next-step .btn {
                 background:  rgb(176, 211, 116);
             }
-    
+
             .center {
                 text-align:center;
             }
@@ -104,29 +104,16 @@
             </div>
             <h2>Thank you for choosing us...</h2>
         </div>
-        
+
         <apex:pageBlock>
-
-            <apex:form id="saveAsync">
-                <apex:actionFunction name="saveAsync" action="{!saveAsync}" rerender="saveAsync">
-                </apex:actionFunction>
-
-                <script>
-                    setTimeout(function() { 
-                        saveAsync();
-                    }, 10000);
-                </script>
-            </apex:form>
-
             <apex:form id="installationChecks">
-
-                <apex:actionFunction name="check" action="{!check}" rerender="installationChecks">
+                <apex:actionFunction name="check" action="{!check}">
                 </apex:actionFunction>
-                
+
                 <script>
-                    setTimeout(function() { 
-                        check(); 
-                    }, 11000);
+                    setTimeout(function() {
+                        check();
+                    }, 5000);
                 </script>
 
                 <div style="display:{!IF(installed, 'none', 'block')}">
@@ -155,7 +142,7 @@
                             </apex:outputPanel>
                         </li>
                         <li>
-                            Rollbar ping successful: 
+                            Rollbar ping successful:
                             <apex:outputPanel rendered="{!checks['rollbarPingSuccessful']}">
                                 <span class="checkmark success">✓</span>
                             </apex:outputPanel>
@@ -234,7 +221,7 @@
                             <p>
                                 <code>Rollbar.log(Exception exception);</code>
                             </p>
-                            <p> 
+                            <p>
                                 You can report an exception object with it's stack trace using the above call.
                             </p>
                         </div>
