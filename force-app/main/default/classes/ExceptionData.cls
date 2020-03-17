@@ -1,5 +1,5 @@
-public with sharing class ExceptionData {
-    public ExceptionData(
+global with sharing class ExceptionData {
+    global ExceptionData(
         String environment,
         String userOrg,
         String className,
@@ -19,39 +19,39 @@ public with sharing class ExceptionData {
         this.column = column;
     }
 
-    public String message() {
+    global String message() {
         return this.message;
     }
 
-    public String userOrg() {
+    global String userOrg() {
         return this.userOrg;
     }
 
-    public String fileName() {
+    global String fileName() {
         return this.fileName;
     }
 
-    public String className() {
+    global String className() {
         return this.className;
     }
 
-    public String context() {
+    global String context() {
         return this.context;
     }
 
-    public Integer line() {
+    global Integer line() {
         return this.line;
     }
 
-    public Integer column() {
+    global Integer column() {
         return this.column;
     }
 
-    public String environment() {
+    global String environment() {
         return this.environment;
     }
 
-    public static ExceptionData fromMap(Map<String, Object> exData) {
+    global static ExceptionData fromMap(Map<String, Object> exData) {
         return new ExceptionData(
             (String)exData.get('environment'),
             (String)exData.get('organization'),
