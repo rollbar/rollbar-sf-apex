@@ -77,9 +77,6 @@
     <div class="content">
 
         <div class="header">
-            <div>
-                <img src="https://rollbar.com/assets/media/rollbar-logo-color-horiz.png" />
-            </div>
             <h2>Rollbar for Salesforce Apex Configuration</h2>
         </div>
 
