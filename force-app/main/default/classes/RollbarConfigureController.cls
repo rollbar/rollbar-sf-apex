@@ -1,8 +1,5 @@
 public with sharing class RollbarConfigureController {
 
-    public Map<String, Boolean> checks  { get; private set; }
-    public Boolean installed { get; private set; }
-
     protected RollbarSettings__c settings { get; set; }
     public String accessToken {
         get {
@@ -13,66 +10,66 @@ public with sharing class RollbarConfigureController {
         }
     }
 
+    public Boolean tokenIsBlank {
+        get {
+            return String.isBlank(this.AccessToken);
+        }
+    }
+
+    public String configState { get; private set; }
+    public String error { get; private set; }
+
     public RollbarConfigureController() {
-        this.installed = false;
         this.settings = RollbarSettings__c.getOrgDefaults();
+        updateConfigState();
+    }
+
+    public Pagereference install()
+    {
+        String message = RollbarInstaller.install(new Config());
+        if (!String.isBlank(message)) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.Error, message));
+        }
+        this.settings = RollbarSettings__c.getOrgDefaults();
+        updateConfigState();
+        return null;
     }
 
     public Pagereference save()
     {
-        
-        Config config;
-        
+        String message;
+
         try {
-            config = new Config(this.accessToken, UserInfo.getOrganizationName());
-        } catch(RollbarNotInitializedException ex) {
+            Config config = new Config(this.accessToken, UserInfo.getOrganizationName());
+            message = RollbarInstaller.verifyToken(config);
+        } catch (RollbarNotInitializedException e) {
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.Error, 'Provided access token is incorrect.'));
-            return (new PageReference('/apex/RollbarConfigure')).setRedirect(true);
         }
-
-        RollbarInstaller.install(config);
-
-        PageReference checkPage = new PageReference('/apex/RollbarInstallationCheck');
-        checkPage.setRedirect(true);
-        return checkPage;
-    }
-
-    public Pagereference saveAsync()
-    {
-        
-        Config config;
-        
-        try {
-            config = new Config(this.accessToken, UserInfo.getOrganizationName());
-        } catch(RollbarNotInitializedException ex) {
-            return null;
+        if (!String.isBlank(message)) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.Error, message));
         }
-
-        RollbarInstaller.install(config);
-
+        this.settings = RollbarSettings__c.getOrgDefaults();
+        updateConfigState();
         return null;
     }
 
-    public Pagereference check()
-    {
-        Config config;
-
-        try {
-            config = new Config(this.accessToken, UserInfo.getOrganizationName());
-        } catch(RollbarNotInitializedException ex) {
-            return null;
+    public void updateConfigState() {
+        if (!this.settings.Initialized__c) {
+            this.configState = 'ConfigState.INIT';
+        } else if (!this.settings.SalesforceApiEnabled__c) {
+            this.configState = 'ConfigState.SF_API';
+        } else if (!this.settings.RollbarApiEnabled__c) {
+            this.configState = 'ConfigState.ROLLBAR_API';
+        } else if (!this.settings.RollbarNetworkAccess__c) {
+            this.configState = 'ConfigState.NETWORK';
+        } else if (!this.settings.EmailServiceEnabled__c) {
+            this.configState = 'ConfigState.EMAIL_SERVICE';
+        } else if (!this.settings.NotificationForwardingEnabled__c) {
+            this.configState = 'ConfigState.FORWARDING';
+        } else if (!this.settings.TokenValid__c) {
+            this.configState = 'ConfigState.TOKEN';
+        } else {
+            this.configState = 'ConfigState.COMPLETE';
         }
-
-        this.checks = RollbarInstaller.check(config);
-
-        Boolean installed = true;
-        for (String key : this.checks.keySet()) {
-            if (!this.checks.get(key)) {
-                installed = false;
-            }
-        }
-        this.installed = installed;
-
-        return null;
     }
 }
