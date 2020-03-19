@@ -1,118 +1,74 @@
 public with sharing class RollbarInstaller {
 
-    public static Map<String, Boolean> check(Config config)
+    public static String install(Config config)
     {
-        Map<String, Boolean> checks = new Map<String, Boolean>();
-
-        try {
-            checks.put('metadataApiAllowed', metadataApiAllowed());
-        } catch (Exception ex) {
-            checks.put('metadataApiAllowed', false);
-        }
-
-        try {
-            checks.put('rollbarApiEndpointAllowed', rollbarApiEndpointAllowed(config.endpoint()));
-        } catch (Exception ex) {
-            checks.put('rollbarApiEndpointAllowed', false);
-        }
-
-        try {
-            checks.put('rollbarPingSuccessful', rollbarPingSuccessful());
-        } catch (Exception ex) {
-            checks.put('rollbarPingSuccessful', false);
-        }
-
-        try {
-            checks.put('rollbarEmailServiceSetUp', rollbarEmailServiceSetUp());
-        } catch (Exception ex) {
-            checks.put('rollbarEmailServiceSetUp', false);
-        }
-
-        try {
-            checks.put('apexNotificationsForwardingSetUp', apexNotificationsForwardingSetUp());
-        } catch (Exception ex) {
-            checks.put('apexNotificationsForwardingSetUp', false);
-        }
-
-        try {
-            checks.put('accessTokenCorrect', accessTokenCorrect(config));
-        } catch (Exception ex) {
-            checks.put('accessTokenCorrect', false);
-        }
-
-        return checks;
+        return RollbarInstaller.enableServices(config.endpoint());
     }
 
-    public static void install(Config config)
+    public static String enableServices(String apiDomain)
     {
-        RollbarInstaller.saveSettings(config);
+        String message = null;
+        RollbarSettings__c settings = RollbarSettings__c.getOrgDefaults();
+        settings.Initialized__c = true;
 
-        RollbarInstaller.enableMetadataApi();
-
-        RollbarInstaller.enableRollbarApiCalls(config.endpoint());
-
-        RollbarInstaller.enableApexNotificationsForwarding();
+        try {
+            RollbarInstaller.enableRollbarApiCalls(settings, apiDomain);
+            RollbarInstaller.enableApexNotificationsForwarding(settings);
+        } catch (Exception e) {
+            message = e.getMessage();
+        }
+        upsert settings;
+        return message;
     }
 
-    public static void saveSettings(Config config)
+    public static void saveToken(Config config)
     {
         RollbarSettings__c settings = RollbarSettings__c.getOrgDefaults();
+
         settings.AccessToken__c = config.accessToken();
         upsert settings;
     }
 
-    @future(callout=true)
-    public static void enableMetadataApi()
+    public static String verifyToken(Config config)
     {
-        MetadataService.MetadataPort service = MetadataService.createServiceWithSession();
+        String message = null;
+        RollbarSettings__c settings = RollbarSettings__c.getOrgDefaults();
 
-        String baseUrl = URL.getSalesforceBaseUrl().toExternalForm() + '/services/Soap/m/31.0';
-
-        HTTPRequest req = new HTTPRequest();
-        req.setEndpoint(baseUrl);
-        req.setMethod('POST');
-        // OAuth header
-        req.setHeader('SOAPAction', '""');
-        req.setHeader('Content-Type', 'text/xml');
-        req.setBody(
-            '<?xml version="1.0" encoding="utf-8"?>' +
-            '<env:Envelope xmlns:env="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'+
-                '<env:Header>' +
-                    '<urn:SessionHeader xmlns:urn="http://soap.sforce.com/2006/04/metadata">' +
-                        '<urn:sessionId>'+UserInfo.getSessionId()+'</urn:sessionId>' +
-                    '</urn:SessionHeader>' +
-                '</env:Header>' +
-                '<env:Body>' +
-                    '<createMetadata xmlns="http://soap.sforce.com/2006/04/metadata">' +
-                        '<metadata xsi:type="RemoteSiteSetting">' +
-                            '<fullName>MetadataAPI</fullName>' +
-                            '<description>SFDC to SFDC metadata api.</description>' +
-                            '<disableProtocolSecurity>false</disableProtocolSecurity>' +
-                            '<isActive>true</isActive>' +
-                            '<url>'+service.endpoint_x+'</url>' +
-                        '</metadata>' +
-                    '</createMetadata>' +
-                '</env:Body>' +
-            '</env:Envelope>'
-        );
-
-        Http h = new Http();
-        HttpResponse res = h.send(req);
-
-        // TODO: how to handle returning results from this if it's a future
+        try {
+            settings.AccessToken__c = config.accessToken();
+            settings.TokenValid__c = RollbarInstaller.accessTokenCorrect(config);
+        } catch (Exception e) {
+            message = e.getMessage();
+        }
+        upsert settings;
+        return message;
     }
 
-    @future(callout=true)
-    public static void enableRollbarApiCalls(String apiDomain)
+    public static void enableRollbarApiCalls(RollbarSettings__c settings, String apiDomain)
     {
-        MetadataService.createRemoteSiteSetting('RollbarAPI', apiDomain);
+        if (!rollbarApiEndpointAllowed(apiDomain)) {
+            MetadataService.createRemoteSiteSetting('RollbarAPI', apiDomain);
+
+            settings.SalesforceApiEnabled__c = metadataApiAllowed();
+            settings.RollbarApiEnabled__c = rollbarApiEndpointAllowed(apiDomain);
+            settings.RollbarNetworkAccess__c = rollbarPingSuccessful();
+        } else if (!settings.RollbarNetworkAccess__c) {
+            settings.RollbarNetworkAccess__c = rollbarPingSuccessful();
+        }
     }
 
-    @future(callout=true)
-    public static void enableApexNotificationsForwarding()
+    public static void enableApexNotificationsForwarding(RollbarSettings__c settings)
     {
-        String serviceEmailAdress = createEmailService();
-        setupApexNotificationEmail(serviceEmailAdress);
+        String serviceEmailAddress;
+        if (!rollbarEmailServiceSetUp()) {
+            serviceEmailAddress = createEmailService();
+        }
+        settings.EmailServiceEnabled__c = rollbarEmailServiceSetUp();
+
+        if (!apexNotificationsForwardingSetUp()) {
+            setupApexNotificationEmail(serviceEmailAddress);
+        }
+        settings.NotificationForwardingEnabled__c = apexNotificationsForwardingSetUp();
     }
 
     public static String createEmailService()
@@ -126,6 +82,7 @@ public with sharing class RollbarInstaller {
         return emailServicesAddress.LocalPart + '@' + emailServicesAddress.EmailDomainName;
     }
 
+    @future(callout=true)
     public static void setupApexNotificationEmail(String email)
     {
         String baseUrl = URL.getSalesforceBaseUrl().toExternalForm() + '/services/data/v35.0/tooling/';
@@ -142,8 +99,6 @@ public with sharing class RollbarInstaller {
 
         Http h = new Http();
         HttpResponse res = h.send(req);
-
-        // TODO: how to handle returning results from this if it's a future
     }
 
     public static Boolean rollbarApiEndpointAllowed(String endpoint)

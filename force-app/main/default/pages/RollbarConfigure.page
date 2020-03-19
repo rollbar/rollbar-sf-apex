@@ -1,4 +1,4 @@
-<apex:page controller="RollbarConfigureController" action="{!check}">
+<apex:page controller="RollbarConfigureController">
     <head>
         <title>Install Rollbar for Apex</title>
     </head>
@@ -78,41 +78,163 @@
 
         <div class="header">
             <div>
-                <img src="https://files.readme.io/22a730d-small-rollbar-logo-white-horiz.png" />
+                <img src="https://rollbar.com/assets/media/rollbar-logo-color-horiz.png" />
             </div>
-            <h2>Thank you for choosing us...</h2>
+            <h2>Rollbar for Salesforce Apex Configuration</h2>
         </div>
 
 
-    
-        <apex:pageBlock>
-            <!-- <h3>Configure Rollbar for Apex</h3>
-            <section class="step1">
-                <h4>
-                    1. Enable calls to your Metdata API:
-                </h4>
-                <c:remotesitehelper rssName="mdapi"
-                                    rssDescription="SFDC to SFDC metadata api."
-                                    pageOverview="Rollbar for Apex requires allowing calls to your organization's Metdata API endpoint."
-                />
-            </section> -->
+
+        <apex:pageBlock id="setup">
+            <apex:pageMessages id="errors" />
+
             <section>
-                <h4>
-                    Set up your Rollbar project post access token:
-                </h4>
+                <apex:outputPanel rendered="{!configState == 'ConfigState.INIT'}" layout="block">
+                    The Rollbar package needs to complete a few additional steps
+                    before it is ready to use. Click the button to allow the installer
+                    to add handling for exception reports and to allow delivery of reports
+                    to Rollbar.
+                    <apex:form>
+                        <apex:commandButton action="{!install}" value="Continue Install" reRender="setup" />
+                    </apex:form>
+                </apex:outputPanel>
+            </section>
+            <section>
+                <apex:outputPanel rendered="{!configState == 'ConfigState.SF_API'}" layout="block">
+                    There was a problem accessing the Salesforce API from your
+                    organization instance. Either configure My Domain for the org
+                    or enable access in Remote Site Settings, and then retry.
+                    <apex:form>
+                        <apex:commandButton action="{!install}" value="Retry" reRender="setup" />
+                    </apex:form>
+                </apex:outputPanel>
 
-                <apex:pageMessages />
+                <apex:outputPanel rendered="{!configState == 'ConfigState.ROLLBAR_API'}" layout="block">
+                    There was a problem configuring access to the Rollbar API in
+                    Remote Site Settings.
+                    <apex:form>
+                        <apex:commandButton action="{!install}" value="Retry" reRender="setup" />
+                    </apex:form>
+                </apex:outputPanel>
 
-                <apex:form>
-                    <p class="center">
-                        <apex:inputText value="{!accessToken}" id="rollbarAccessToken" html-placeholder="Rollbar Access Token" />
-                    </p>
-                    <div class="next-step">
-                        <apex:commandButton action="{!save}" value="Finish" id="rollbarConfigure" />
+                <apex:outputPanel rendered="{!configState == 'ConfigState.NETWORK'}" layout="block">
+                    There was a problem reaching the Rollbar API over the network.
+                    <apex:form>
+                        <apex:commandButton action="{!install}" value="Retry" reRender="setup" />
+                    </apex:form>
+                </apex:outputPanel>
+
+                <apex:outputPanel rendered="{!configState == 'ConfigState.EMAIL_SERVICE'}" layout="block">
+                    There was a problem creating the Email Service for error notifications.
+                    <apex:form>
+                        <apex:commandButton action="{!install}" value="Retry" reRender="setup" />
+                    </apex:form>
+                </apex:outputPanel>
+
+                <apex:outputPanel rendered="{!configState == 'ConfigState.FORWARDING'}" layout="block">
+                    Click to enable forwarding for error notifications.
+                    <apex:form>
+                        <apex:commandButton action="{!install}" value="Setup Forwarding" reRender="setup" />
+                    </apex:form>
+                </apex:outputPanel>
+
+                <apex:outputPanel rendered="{!error}" layout="block">
+                    <apex:outputText value="{!error}" />
+                </apex:outputPanel>
+
+                <apex:outputPanel rendered="{!configState == 'ConfigState.TOKEN'}" layout="block">
+                    <h4>
+                        Set up your Rollbar project post access token:
+                    </h4>
+                    <apex:outputPanel rendered="{!tokenIsBlank}" layout="block">
+                        Use the host write token from your Rollbar project.
+                    </apex:outputPanel>
+                    <apex:outputPanel rendered="{! !tokenIsBlank}" layout="block">
+                        There is a problem with the current token. Check to ensure it is correct,
+                        and is not a client token (used for browser and mobile projects.)
+                    </apex:outputPanel>
+
+                    <apex:form>
+                        <p class="center">
+                            <apex:inputText value="{!accessToken}" id="rollbarAccessToken" html-placeholder="Rollbar Access Token" />
+                        </p>
+                        <div class="next-step">
+                            <apex:commandButton action="{!save}" value="Save and Verify" id="rollbarConfigure" reRender="setup" />
+                        </div>
+                    </apex:form>
+                </apex:outputPanel>
+            </section>
+            <section>
+                <apex:outputPanel rendered="{!configState == 'ConfigState.COMPLETE'}" layout="block">
+                    <header>
+                        <h3 class="success">Rollbar is configured</h3>
+                        <p>
+                            We sent an introductory log message to your Rollbar project. Look for item:
+                        </p>
+                        <p>
+                            <code>Rollbar Apex SDK installed correctly in ...</code>
+                        </p>
+                    </header>
+                    <div class="section">
+                        <h4>
+                            Here is how to get started using Rollbar in your Apex code:
+                        </h4>
+                        <div class="section">
+                            <h5>Initialization</h5>
+                            <p>
+                                Default initialization happens implicitly, and there is no
+                                need to exlicitly init unless setting a custom configuration.
+                                The default initialization uses the settings provided in
+                                the package configuration.
+                            </p>
+                            <p>
+                                <code>Rollbar.init();</code>
+                            </p>
+                            <p>
+                                This call will initialize the Rollbar notifier with your organization's
+                                default access token and environment. This is identical to the implicit
+                                initialization.
+                            </p>
+                            <p>
+                                <code>Rollbar.init(String accessToken, String environment);</code>
+                            </p>
+                            <p>
+                                With this overload you can provide a custom access token and custom environment for further
+                                reporting.
+                            </p>
+                        </div>
+                        <div class="section">
+                            <h5>Reporting</h5>
+                            <p>
+                                <code>rollbar.Rollbar.log(String level, String message);</code>
+                            </p>
+                            <p>
+                                This call will report an arbitrary message at one of the Rollbar reporting levels.
+                            </p>
+                            <p>
+                                <code>rollbar.Rollbar.log(Exception exception);</code>
+                            </p>
+                            <p>
+                                You can report an exception object with it's stack trace using the above call.
+                            </p>
+                        </div>
+                        <div class="section">
+                            <h4>Update Rollbar Token</h4>
+                            <apex:form>
+                                <p class="center">
+                                    <apex:inputText value="{!accessToken}" id="rollbarAccessToken" html-placeholder="Rollbar Access Token" />
+                                </p>
+                                <div class="next-step">
+                                    <apex:commandButton action="{!save}" value="Update and Verify" id="rollbarConfigure" reRender="setup" />
+                                </div>
+                            </apex:form>
+                        </div>
+                        <div class="section">
+                            <a class="back" href="/">Back to your Organization</a>
+                        </div>
                     </div>
-                </apex:form>
+                </apex:outputPanel>
             </section>
         </apex:pageBlock>
-
     </div>
 </apex:page>

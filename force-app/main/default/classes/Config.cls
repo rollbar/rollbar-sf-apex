@@ -5,7 +5,10 @@ public with sharing class Config {
         }
         this.accessToken = accessToken;
         this.environment = environment;
-        this.endpoint = 'https://api.rollbar.com/api/1/item/';
+    }
+
+    public Config() {
+        // Allows access to the default endpoint without a token.
     }
 
     public String accessToken() {
@@ -22,5 +25,5 @@ public with sharing class Config {
 
     private String accessToken = null;
     private String environment = null;
-    private String endpoint = null;
+    private String endpoint = 'https://api.rollbar.com/api/1/item/';
 }
