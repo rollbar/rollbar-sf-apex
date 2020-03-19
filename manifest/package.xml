@@ -34,8 +34,7 @@
     </types>
 
     <types>
-        <members>RollbarConfigure</members>
-        <members>RollbarInstallationCheck</members>
         <name>ApexPage</name>
+        <members>RollbarConfigure</members>
     </types>
 </Package>
