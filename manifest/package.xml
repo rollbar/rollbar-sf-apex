@@ -37,4 +37,9 @@
         <name>ApexPage</name>
         <members>RollbarConfigure</members>
     </types>
+
+    <types>
+        <name>CustomObject</name>
+        <members>RollbarSettings__c</members>
+    </types>
 </Package>

@@ -1,10 +1,10 @@
 {
-  "orgName": "arturmoczulski Company",
+  "orgName": "Rollbar CI scratch org",
   "edition": "Developer",
   "features": [],
   "settings": {
-    "orgPreferenceSettings": {
-      "s1DesktopEnabled": true
+    "lightningExperienceSettings": {
+      "enableS1DesktopEnabled": true
     }
   }
 }

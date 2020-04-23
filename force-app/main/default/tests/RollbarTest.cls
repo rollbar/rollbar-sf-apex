@@ -1,24 +1,26 @@
 @isTest
 public class RollbarTest {
-    @isTest(SeeAllData=true)
+    @isTest
     public static void testLogMessage() {
         Test.setMock(HttpCalloutMock.class, new RollbarApiCalloutMock());
 
+        Rollbar.init('test-token', 'test-env');
         HttpResponse response = Rollbar.log('info', 'Message from the Apex SDK');
 
         System.assertEquals(200, response.getStatusCode());
     }
 
-    @isTest(SeeAllData=true)
+    @isTest
     public static void testLogException() {
         Test.setMock(HttpCalloutMock.class, new RollbarApiCalloutMock());
 
+        Rollbar.init('test-token', 'test-env');
         HttpResponse response = Rollbar.log(new DataBuilderTestException());
 
         System.assertEquals(200, response.getStatusCode());
     }
 
-    @isTest(SeeAllData=true)
+    @isTest
     public static void testLogExceptionData() {
         Test.setMock(HttpCalloutMock.class, new RollbarApiCalloutMock());
 
@@ -32,6 +34,7 @@ public class RollbarTest {
         exDataMap.put('line', 14);
         exDataMap.put('column', 12);
 
+        Rollbar.init('test-token', 'test-env');
         HttpResponse response = Rollbar.log(ExceptionData.fromMap(exDataMap));
 
         System.assertEquals(200, response.getStatusCode());
