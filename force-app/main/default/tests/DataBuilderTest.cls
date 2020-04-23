@@ -1,5 +1,5 @@
 @isTest
-public class DataBuilderTest 
+public class DataBuilderTest
 {
     @isTest
     static void testBuildMessagePayload()
@@ -7,10 +7,10 @@ public class DataBuilderTest
         DataBuilder subject = new DataBuilder(new Config('foo', 'bar'));
         String expected = 'Message built in DataBuilderTest';
 
-        Map<String, Object> result = subject.buildPayload('info', expected);
+        Map<String, Object> result = subject.buildPayload('info', expected, null);
 
         Map<String, Object> data = (Map<String, Object>)result.get('data');
-            
+
         Map<String, Object> notifierMap = (Map<String, Object>)data.get('notifier');
 
         System.assertEquals(Notifier.NAME, (String)notifierMap.get('name'));
@@ -40,7 +40,7 @@ public class DataBuilderTest
             expectedClass = exc.getTypeName();
             throw exc;
         } catch(Exception exc) {
-            Map<String, Object> result = subject.buildPayload(exc);
+            Map<String, Object> result = subject.buildPayload('error', exc, null);
 
             Map<String, Object> data = (Map<String, Object>)result.get('data');
 
@@ -71,7 +71,7 @@ public class DataBuilderTest
 
         DataBuilderTestException exc = new DataBuilderTestException('foobar');
 
-        Map<String, Object> result = subject.buildPayload(exc, expectedCustom);
+        Map<String, Object> result = subject.buildPayload('error', exc, expectedCustom);
         Map<String, Object> data = (Map<String, Object>)result.get('data');
         Map<String, Object> custom = (Map<String, Object>)data.get('custom');
 
@@ -98,7 +98,7 @@ public class DataBuilderTest
         } catch(Exception exc1) {
             expectedClass1 = exc1.getTypeName();
 
-            Map<String, Object> result = subject.buildPayload(exc1);
+            Map<String, Object> result = subject.buildPayload('error', exc1, null);
 
             Map<String, Object> data = (Map<String, Object>)result.get('data');
 
@@ -135,7 +135,7 @@ public class DataBuilderTest
         expected.put('context', 'Exception context');
         expected.put('line', 14);
         expected.put('column', 12);
-        
+
         ExceptionData exData = ExceptionData.fromMap(expected);
 
         Map<String, Object> result = subject.buildPayload(exData);
@@ -145,7 +145,7 @@ public class DataBuilderTest
         Map<String, Object> custom = (Map<String, Object>)data.get('custom');
 
         System.assertEquals((String)expected.get('context'), (String)custom.get('context'));
-            
+
         Map<String, Object> notifierMap = (Map<String, Object>)data.get('notifier');
         System.assertEquals(Notifier.NAME, (String)notifierMap.get('name'));
         System.assertEquals(Notifier.VERSION, (String)notifierMap.get('version'));

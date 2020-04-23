@@ -9,32 +9,61 @@ public with sharing class Notifier
         this.dataBuilder = new DataBuilder(this.config);
     }
 
-    public HttpResponse log(String level, String message)
+    public HttpResponse log(String level, String message, Map<String, Object> custom, SendMethod method)
     {
-        return send(dataBuilder.buildPayload(level, message));
+        return send(dataBuilder.buildPayload(level, message, custom), method);
     }
 
-    public HttpResponse log(Exception exc)
+    public HttpResponse log(String level, Exception exc, Map<String, Object> custom, SendMethod method)
     {
-        return send(dataBuilder.buildPayload(exc));
+        return send(dataBuilder.buildPayload(level, exc, custom), method);
     }
 
-    public HttpResponse log(Exception exc, Map<String, Object> custom)
+    public HttpResponse log(ExceptionData exData, SendMethod method)
     {
-        return send(dataBuilder.buildPayload(exc, custom));
+        return send(dataBuilder.buildPayload(exData), method);
     }
 
-    public HttpResponse log(ExceptionData exData)
+    public HttpResponse send(Map<String, Object> payload, SendMethod method)
     {
-        return send(dataBuilder.buildPayload(exData));
+        return methodSend(JSON.serialize(payload), method);
     }
 
-    private HttpResponse send(Map<String, Object> payload)
+    public HttpResponse methodSend(String payload, SendMethod method)
     {
-        return send(JSON.serialize(payload));
+        HttpResponse response = null;
+
+        switch on method {
+            when SYNC {
+                response = syncSend(payload);
+            }
+            when FUTURE {
+                Notifier.futureSend(payload);
+            }
+            when else {
+                eventSend(payload);
+            }
+        }
+
+        return response;
     }
 
-    private HttpResponse send(String payload)
+    private void eventSend(String payload)
+    {
+        RollbarEvent__e event = new RollbarEvent__e(Data1__c = payload);
+
+        EventBus.publish(event);
+    }
+
+    @future (callout=true)
+    private static void futureSend(String payload)
+    {
+        Notifier notifier = Rollbar.initializedInstance().notifier();
+
+        notifier.syncSend(payload);
+    }
+
+    private HttpResponse syncSend(String payload)
     {
         HttpRequest request = new HttpRequest();
         request.setEndpoint(this.config.endpoint());

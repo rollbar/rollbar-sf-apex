@@ -18,6 +18,7 @@
         <members>RollbarInstaller</members>
         <members>EmailServiceInstaller</members>
         <members>RollbarNotInitializedException</members>
+        <members>SendMethod</members>
 
         <!-- tests -->
         <members>ConfigTest</members>
@@ -30,6 +31,7 @@
 
         <!-- test helpers -->
         <members>RollbarApiCalloutMock</members>
+        <members>RollbarApiVerifyRequestCalloutMock</members>
         <members>DataBuilderTestException</members>
     </types>
 
@@ -41,5 +43,11 @@
     <types>
         <name>CustomObject</name>
         <members>RollbarSettings__c</members>
+        <members>RollbarEvent__e</members>
+    </types>
+
+    <types>
+        <name>ApexTrigger</name>
+        <members>EventSend</members>
     </types>
 </Package>
