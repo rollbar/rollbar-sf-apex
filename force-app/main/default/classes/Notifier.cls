@@ -1,7 +1,7 @@
 public with sharing class Notifier
 {
     public static final String NAME = 'rollbar-sf-apex';
-    public static final String VERSION = '1.10.0';
+    public static final String VERSION = '2.0.0';
 
     public Notifier(Config config)
     {
