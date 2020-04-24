@@ -8,14 +8,14 @@ public class NotifierTest {
 
         Notifier subject = new Notifier(config);
 
-        HttpResponse response = subject.log('info', 'Message from the Apex SDK');
+        HttpResponse response = subject.log('info', 'Message from the Apex SDK', null, SendMethod.SYNC);
 
         System.assertEquals(200, response.getStatusCode());
-        
+
         JSONParser parser = JSON.createParser(response.getBody());
         Integer err = null;
         while (parser.nextToken() != null) {
-            if ((parser.getCurrentToken() == JSONToken.FIELD_NAME) && 
+            if ((parser.getCurrentToken() == JSONToken.FIELD_NAME) &&
                 (parser.getText() == 'err')) {
                 parser.nextToken();
                 err = parser.getIntegerValue();
@@ -35,14 +35,14 @@ public class NotifierTest {
 
         DataBuilderTestException exc = new DataBuilderTestException();
 
-        HttpResponse response = subject.log(exc);
+        HttpResponse response = subject.log('error', exc, null, SendMethod.SYNC);
 
         System.assertEquals(200, response.getStatusCode());
-        
+
         JSONParser parser = JSON.createParser(response.getBody());
         Integer err = null;
         while (parser.nextToken() != null) {
-            if ((parser.getCurrentToken() == JSONToken.FIELD_NAME) && 
+            if ((parser.getCurrentToken() == JSONToken.FIELD_NAME) &&
                 (parser.getText() == 'err')) {
                 parser.nextToken();
                 err = parser.getIntegerValue();
@@ -69,17 +69,17 @@ public class NotifierTest {
         expected.put('context', 'Exception context');
         expected.put('line', 14);
         expected.put('column', 12);
-        
+
         ExceptionData exData = ExceptionData.fromMap(expected);
 
-        HttpResponse response = subject.log(exData);
+        HttpResponse response = subject.log(exData, SendMethod.SYNC);
 
         System.assertEquals(200, response.getStatusCode());
-        
+
         JSONParser parser = JSON.createParser(response.getBody());
         Integer err = null;
         while (parser.nextToken() != null) {
-            if ((parser.getCurrentToken() == JSONToken.FIELD_NAME) && 
+            if ((parser.getCurrentToken() == JSONToken.FIELD_NAME) &&
                 (parser.getText() == 'err')) {
                 parser.nextToken();
                 err = parser.getIntegerValue();

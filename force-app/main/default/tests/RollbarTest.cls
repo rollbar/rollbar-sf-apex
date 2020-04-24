@@ -5,9 +5,35 @@ public class RollbarTest {
         Test.setMock(HttpCalloutMock.class, new RollbarApiCalloutMock());
 
         Rollbar.init('test-token', 'test-env');
-        HttpResponse response = Rollbar.log('info', 'Message from the Apex SDK');
+        HttpResponse response = Rollbar.log('info', 'Message from the Apex SDK', SendMethod.SYNC);
 
         System.assertEquals(200, response.getStatusCode());
+    }
+
+    @isTest
+    public static void testLogMessageFuture() {
+        Test.setMock(HttpCalloutMock.class, new RollbarApiVerifyRequestCalloutMock());
+
+        insert new RollbarSettings__c(AccessToken__c = 'test-token');
+
+        Test.startTest();
+        Rollbar.log('info', 'Message from the Apex SDK', SendMethod.FUTURE);
+        Test.stopTest();
+
+        // Asserts valid payload in the mock.
+    }
+
+    @isTest
+    public static void testLogMessageEvent() {
+        Test.setMock(HttpCalloutMock.class, new RollbarApiVerifyRequestCalloutMock());
+
+        insert new RollbarSettings__c(AccessToken__c = 'test-token');
+
+        Test.startTest();
+        Rollbar.log('info', 'Message from the Apex SDK', SendMethod.EVENT);
+        Test.stopTest();
+
+        // Asserts valid payload in the mock.
     }
 
     @isTest
@@ -15,7 +41,7 @@ public class RollbarTest {
         Test.setMock(HttpCalloutMock.class, new RollbarApiCalloutMock());
 
         Rollbar.init('test-token', 'test-env');
-        HttpResponse response = Rollbar.log(new DataBuilderTestException());
+        HttpResponse response = Rollbar.log(new DataBuilderTestException(), SendMethod.SYNC);
 
         System.assertEquals(200, response.getStatusCode());
     }

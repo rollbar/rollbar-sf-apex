@@ -41,26 +41,45 @@ global with sharing class Rollbar {
     }
 
     global static HttpResponse log(String level, String message) {
+        return log(level, message, null, null);
+    }
+
+    global static HttpResponse log(String level, String message, Map<String, Object> custom) {
+        return log(level, message, custom, null);
+    }
+
+    global static HttpResponse log(String level, String message, SendMethod method) {
+        return log(level, message, null, method);
+    }
+
+    global static HttpResponse log(String level, String message, Map<String, Object> custom, SendMethod method) {
         Rollbar instance = initializedInstance();
-        return instance.notifier.log(level, message);
+        return instance.notifier.log(level, message, custom, method);
     }
 
     global static HttpResponse log(Exception exc) {
-        Rollbar instance = initializedInstance();
-        return instance.notifier.log(exc);
+        return log(exc, null, null);
+    }
+
+    global static HttpResponse log(Exception exc, SendMethod method) {
+        return log(exc, null, method);
     }
 
     global static HttpResponse log(Exception exc, Map<String, Object> custom) {
+        return log(exc, custom, null);
+    }
+
+    global static HttpResponse log(Exception exc, Map<String, Object> custom, SendMethod method) {
         Rollbar instance = initializedInstance();
-        return instance.notifier.log(exc, custom);
+        return instance.notifier.log('error', exc, custom, method);
     }
 
     global static HttpResponse log(ExceptionData exData) {
         Rollbar instance = initializedInstance();
-        return instance.notifier.log(exData);
+        return instance.notifier.log(exData, SendMethod.SYNC);
     }
 
-    private static Rollbar initializedInstance()
+    public static Rollbar initializedInstance()
     {
         Rollbar instance = Rollbar.instance();
         if (!instance.initialized) {
@@ -71,6 +90,10 @@ global with sharing class Rollbar {
     }
 
     private Rollbar() {
+    }
+
+    public Notifier notifier() {
+        return notifier;
     }
 
     private static Rollbar instance = null;

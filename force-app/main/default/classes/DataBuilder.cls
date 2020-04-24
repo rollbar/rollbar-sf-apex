@@ -3,19 +3,14 @@ public with sharing class DataBuilder {
         this.config = config;
     }
 
-    public Map<String, Object> buildPayload(String level, String message)
+    public Map<String, Object> buildPayload(String level, String message, Map<String, Object> custom)
     {
-        return buildPayloadStructure(level, buildMessageBody(message), null);
+        return buildPayloadStructure(level, buildMessageBody(message), custom);
     }
 
-    public Map<String, Object> buildPayload(Exception exc)
+    public Map<String, Object> buildPayload(String level, Exception exc, Map<String, Object> custom)
     {
-        return buildPayloadStructure('error', buildExceptionBody(exc), null);
-    }
-
-    public Map<String, Object> buildPayload(Exception exc, Map<String, Object> custom)
-    {
-        return buildPayloadStructure('error', buildExceptionBody(exc), custom);
+        return buildPayloadStructure(level, buildExceptionBody(exc), custom);
     }
 
     public Map<String, Object> buildPayload(ExceptionData exData)
@@ -52,14 +47,14 @@ public with sharing class DataBuilder {
     }
 
     private Map<String, Object> buildPayloadStructure(
-        String level, 
-        Map<String, Object> body, 
+        String level,
+        Map<String, Object> body,
         Map<String, Object> custom
     ) {
         Map<String, Object> data = this.buildDataStructure(
-            level, 
-            this.config.environment(), 
-            body, 
+            level,
+            this.config.environment(),
+            body,
             custom
         );
 
@@ -75,7 +70,7 @@ public with sharing class DataBuilder {
         Map<String, Object> body,
         Map<String, Object> custom
     ) {
-        
+
         Map<String, Object> notifierMap = new Map<String, Object>();
         notifierMap.put('name', Notifier.NAME);
         notifierMap.put('version', Notifier.VERSION);
@@ -118,7 +113,7 @@ public with sharing class DataBuilder {
         Map<String, Object> excMap = new Map<String, Object>();
         excMap.put('class', exData.className());
         excMap.put('message', exData.message());
-        
+
         return buildTraceStructure(excMap, framesList);
     }
 
