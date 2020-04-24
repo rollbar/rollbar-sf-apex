@@ -176,7 +176,7 @@ public with sharing class RollbarInstaller {
     public static Boolean accessTokenCorrect(Config config)
     {
         Rollbar.init(config);
-        System.HttpResponse response = Rollbar.log('info', 'Rollbar Apex SDK installed correctly in ' + UserInfo.getOrganizationName());
+        System.HttpResponse response = Rollbar.log('info', 'Rollbar Apex SDK installed correctly in ' + UserInfo.getOrganizationName(), SendMethod.SYNC);
         return response.getStatusCode() == 200;
     }
 
