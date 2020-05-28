@@ -41,20 +41,26 @@ global with sharing class Rollbar {
     }
 
     global static HttpResponse log(String level, String message) {
-        return log(level, message, null, null);
+        return log(level, message, null, null, null);
     }
 
     global static HttpResponse log(String level, String message, Map<String, Object> custom) {
-        return log(level, message, custom, null);
+        return log(level, message, custom, null, null);
     }
 
     global static HttpResponse log(String level, String message, SendMethod method) {
-        return log(level, message, null, method);
+        return log(level, message, null, null, method);
     }
 
     global static HttpResponse log(String level, String message, Map<String, Object> custom, SendMethod method) {
+        return log(level, message, custom, null, method);
+    }
+
+    // Keep this unpublished (public, not global) until Telemetry interface can be frozen,
+    // which might be never.
+    public static HttpResponse log(String level, String message, Map<String, Object> custom, List<Telemetry> telemetry, SendMethod method) {
         Rollbar instance = initializedInstance();
-        return instance.notifier.log(level, message, custom, method);
+        return instance.notifier.log(level, message, custom, telemetry, method);
     }
 
     global static HttpResponse log(Exception exc) {

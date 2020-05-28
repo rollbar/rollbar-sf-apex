@@ -7,7 +7,7 @@ public class DataBuilderTest
         DataBuilder subject = new DataBuilder(new Config('foo', 'bar'));
         String expected = 'Message built in DataBuilderTest';
 
-        Map<String, Object> result = subject.buildPayload('info', expected, null);
+        Map<String, Object> result = subject.buildPayload('info', expected, null, null);
 
         Map<String, Object> data = (Map<String, Object>)result.get('data');
 
@@ -19,6 +19,49 @@ public class DataBuilderTest
         Map<String, Object> body = (Map<String, Object>)data.get('body');
 
         System.assertEquals(expected, ((Map<String, Object>)body.get('message')).get('body'));
+    }
+
+    @isTest
+    static void testBuildMessagePayloadWithTelemetry()
+    {
+        DataBuilder subject = new DataBuilder(new Config('foo', 'bar'));
+
+        List<Telemetry> telemetryList = new List<Telemetry>();
+        telemetryList.add(new Telemetry(
+            'info',
+            'log',
+            'server',
+            987654321,
+            new Map<String, String>{ 'message' => 'first' }
+        ));
+        telemetryList.add(new Telemetry(
+            'info',
+            'log',
+            'server',
+            987654321,
+            new Map<String, String>{ 'message' => 'second' }
+        ));
+
+        Map<String, Object> result = subject.buildPayload('info', 'Telemetry test', null, telemetryList);
+
+        Map<String, Object> data = (Map<String, Object>)result.get('data');
+        Map<String, Object> body = (Map<String, Object>)data.get('body');
+
+        List<Map<String, Object>> telemetryObjects = new List<Map<String, Object>>();
+        for (Object instance : (List<Object>)body.get('telemetry')) {
+            telemetryObjects.add((Map<String, Object>)instance);
+        }
+
+        for (Map<String, Object> telemetry : telemetryObjects) {
+            System.assertEquals((String)telemetry.get('level'), 'info');
+            System.assertEquals((String)telemetry.get('type'), 'log');
+            System.assertEquals((String)telemetry.get('source'), 'server');
+            System.assertEquals((Long)telemetry.get('timestamp_ms'), 987654321);
+        }
+        Map<String, String> messageBody = (Map<String, String>)telemetryObjects.get(0).get('body');
+        System.assertEquals(messageBody.get('message'), 'first');
+        messageBody = (Map<String, String>)telemetryObjects.get(1).get('body');
+        System.assertEquals(messageBody.get('message'), 'second');
     }
 
     @isTest

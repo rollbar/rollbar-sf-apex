@@ -3,9 +3,9 @@ public with sharing class DataBuilder {
         this.config = config;
     }
 
-    public Map<String, Object> buildPayload(String level, String message, Map<String, Object> custom)
+    public Map<String, Object> buildPayload(String level, String message, Map<String, Object> custom, List<Telemetry> telemetry)
     {
-        return buildPayloadStructure(level, buildMessageBody(message), custom);
+        return buildPayloadStructure(level, buildMessageBody(message, telemetry), custom);
     }
 
     public Map<String, Object> buildPayload(String level, Exception exc, Map<String, Object> custom)
@@ -86,13 +86,22 @@ public with sharing class DataBuilder {
         return structure;
     }
 
-    private Map<String, Object> buildMessageBody(String message)
+    private Map<String, Object> buildMessageBody(String message, List<Telemetry> telemetry)
     {
         Map<String, Object> messageMap = new Map<String, Object>();
         messageMap.put('body', message);
 
         Map<String, Object> body = new Map<String, Object>();
         body.put('message', messageMap);
+
+        if (telemetry != null) {
+            List<Object> telemetryList = new List<Object>();
+
+            for (Telemetry t : telemetry) {
+                telemetryList.add(t.toMap());
+            }
+            body.put('telemetry', telemetryList);
+        }
 
         return body;
     }

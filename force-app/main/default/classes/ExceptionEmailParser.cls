@@ -15,6 +15,12 @@ public with sharing class ExceptionEmailParser {
         return exData;
     }
 
+    private static String fromName = 'ApexApplication';
+
+    public static String fromName() {
+        return fromName;
+    }
+
     public static String parseEnvironment(String emailBody) {
         return emailBody.split('\\n')[0];
     }
