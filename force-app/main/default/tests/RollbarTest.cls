@@ -37,6 +37,25 @@ public class RollbarTest {
     }
 
     @isTest
+    public static void testLogMessageWithCustomDataAndTelemetry() {
+        Test.setMock(HttpCalloutMock.class, new RollbarApiCalloutMock());
+
+        Map<String, Object> customData = new Map<String, Object>{ 'foo' => 'bar' };
+        List<Telemetry> telemetryList = new List<Telemetry>();
+
+        Rollbar.init('test-token', 'test-env');
+        HttpResponse response = Rollbar.log(
+            'info',
+            'Message from the Apex SDK',
+            customData,
+            telemetryList,
+            SendMethod.SYNC
+        );
+
+        System.assertEquals(200, response.getStatusCode());
+    }
+
+    @isTest
     public static void testLogException() {
         Test.setMock(HttpCalloutMock.class, new RollbarApiCalloutMock());
 

@@ -9,9 +9,9 @@ public with sharing class Notifier
         this.dataBuilder = new DataBuilder(this.config);
     }
 
-    public HttpResponse log(String level, String message, Map<String, Object> custom, SendMethod method)
+    public HttpResponse log(String level, String message, Map<String, Object> custom, List<Telemetry> telemetry, SendMethod method)
     {
-        return send(dataBuilder.buildPayload(level, message, custom), method);
+        return send(dataBuilder.buildPayload(level, message, custom, telemetry), method);
     }
 
     public HttpResponse log(String level, Exception exc, Map<String, Object> custom, SendMethod method)

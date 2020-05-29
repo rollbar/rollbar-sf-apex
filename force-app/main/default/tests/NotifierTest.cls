@@ -8,7 +8,7 @@ public class NotifierTest {
 
         Notifier subject = new Notifier(config);
 
-        HttpResponse response = subject.log('info', 'Message from the Apex SDK', null, SendMethod.SYNC);
+        HttpResponse response = subject.log('info', 'Message from the Apex SDK', null, null, SendMethod.SYNC);
 
         System.assertEquals(200, response.getStatusCode());
 

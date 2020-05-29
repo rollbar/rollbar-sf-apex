@@ -10,6 +10,7 @@
         <members>ExceptionData</members>
         <members>ExceptionEmailParser</members>
         <members>ExceptionEmailParsingException</members>
+        <members>FlowEmailParser</members>
         <members>MetadataService</members>
         <members>Notifier</members>
         <members>Rollbar</members>
@@ -19,19 +20,24 @@
         <members>EmailServiceInstaller</members>
         <members>RollbarNotInitializedException</members>
         <members>SendMethod</members>
+        <members>Telemetry</members>
 
         <!-- tests -->
         <members>ConfigTest</members>
         <members>DataBuilderTest</members>
         <members>ExceptionEmailParserTest</members>
+        <members>FlowEmailParserTest</members>
         <members>NotifierTest</members>
         <members>MetadataServiceTest</members>
         <members>RollbarConfigureControllerTest</members>
+        <members>RollbarExceptionEmailHandlerTest</members>
         <members>RollbarTest</members>
+        <members>TelemetryTest</members>
 
         <!-- test helpers -->
         <members>RollbarApiCalloutMock</members>
         <members>RollbarApiVerifyRequestCalloutMock</members>
+        <members>RollbarApiVerifyTelemetryCalloutMock</members>
         <members>DataBuilderTestException</members>
     </types>
 
