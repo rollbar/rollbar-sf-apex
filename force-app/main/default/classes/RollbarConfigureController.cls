@@ -53,8 +53,27 @@ public with sharing class RollbarConfigureController {
         return null;
     }
 
+    public Pagereference uninstall() {
+        RollbarInstaller.prepareUninstall();
+
+        this.settings = RollbarSettings__c.getOrgDefaults();
+        this.settings.PreparedForUninstall__c = true;
+        upsert this.settings;
+        updateConfigState();
+        return null;
+    }
+
+    public Pagereference reinstall() {
+        this.settings.PreparedForUninstall__c = false;
+        upsert this.settings;
+        updateConfigState();
+        return null;
+    }
+
     public void updateConfigState() {
-        if (!this.settings.Initialized__c) {
+        if (this.settings.PreparedForUninstall__c) {
+            this.configState = 'ConfigState.UNINSTALL';
+        } else if (!this.settings.Initialized__c) {
             this.configState = 'ConfigState.INIT';
         } else if (!this.settings.SalesforceApiEnabled__c) {
             this.configState = 'ConfigState.SF_API';
