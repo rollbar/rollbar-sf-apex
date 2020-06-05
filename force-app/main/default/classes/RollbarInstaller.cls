@@ -5,6 +5,22 @@ public with sharing class RollbarInstaller {
         return RollbarInstaller.enableServices(config.endpoint());
     }
 
+    @future(callout=true)
+    public static void prepareUninstall()
+    {
+        RollbarSettings__c settings = RollbarSettings__c.getOrgDefaults();
+
+        deleteApexEmailNotification();
+        deleteEmailServicesFunction();
+        deleteRemoteSiteSetting();
+
+        settings.RollbarApiEnabled__c = remoteSiteSettingSetUp();
+        settings.EmailServiceEnabled__c = rollbarEmailServiceSetUp();
+        settings.NotificationForwardingEnabled__c = apexNotificationsForwardingSetUp();
+
+        upsert settings;
+    }
+
     public static String enableServices(String apiDomain)
     {
         String message = null;
@@ -103,16 +119,11 @@ public with sharing class RollbarInstaller {
 
     public static Boolean rollbarApiEndpointAllowed(String endpoint)
     {
-        MetadataService.MetadataPort service = MetadataService.createServiceWithSession();
-        MetadataService.ReadRemoteSiteSettingResult result = (MetadataService.ReadRemoteSiteSettingResult)service.readMetadata('RemoteSiteSetting', new String[] {'RollbarAPI'});
+        MetadataService.RemoteSiteSetting setting = remoteSiteSetting();
 
-        MetadataService.Metadata[] records = result.getRecords();
-
-        if (records.size() == 0) {
+        if (setting == null) {
             return false;
         }
-
-        MetadataService.RemoteSiteSetting setting = (MetadataService.RemoteSiteSetting)result.getRecords()[0];
 
         if (setting.fullName != 'RollbarAPI') {
             return false;
@@ -123,6 +134,40 @@ public with sharing class RollbarInstaller {
         }
 
         return true;
+    }
+
+    public static MetadataService.RemoteSiteSetting remoteSiteSetting() {
+        MetadataService.MetadataPort service = MetadataService.createServiceWithSession();
+        MetadataService.ReadRemoteSiteSettingResult result = (MetadataService.ReadRemoteSiteSettingResult)service.readMetadata('RemoteSiteSetting', new String[] {'RollbarAPI'});
+
+        MetadataService.Metadata[] records = result.getRecords();
+
+        if (records.size() == 0) {
+            return null;
+        }
+
+        MetadataService.RemoteSiteSetting setting = (MetadataService.RemoteSiteSetting)result.getRecords()[0];
+
+        if (setting.fullName == 'RollbarAPI') {
+            return setting;
+        } else {
+            return null;
+        }
+    }
+
+    public static Boolean remoteSiteSettingSetUp() {
+        if (remoteSiteSetting() != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static void deleteRemoteSiteSetting() {
+        if (RollbarInstaller.remoteSiteSetting() != null) {
+            MetadataService.MetadataPort service = MetadataService.createServiceWithSession();
+            service.deleteMetadata('RemoteSiteSetting', new String[] {'RollbarAPI'});
+        }
     }
 
     public static Boolean rollbarPingSuccessful()
@@ -140,8 +185,8 @@ public with sharing class RollbarInstaller {
     public static Boolean rollbarEmailServiceSetUp()
     {
         try {
-            EmailServicesFunction emailFunction = [SELECT Id FROM EmailServicesFunction WHERE FunctionName='RollbarEmailService'];
-            EmailServicesAddress emailServicesAddress = [SELECT Id, LocalPart, EmailDomainName FROM EmailServicesAddress WHERE FunctionId = :emailFunction.Id];
+            EmailServicesFunction emailFunction = emailServicesFunction();
+            EmailServicesAddress emailServicesAddress = emailServicesAddress(emailFunction);
         } catch (Exception ex) {
             return false;
         }
@@ -149,28 +194,79 @@ public with sharing class RollbarInstaller {
         return true;
     }
 
-    public static Boolean apexNotificationsForwardingSetUp()
-    {
+    public static EmailServicesFunction emailServicesFunction() {
+        return [SELECT Id FROM EmailServicesFunction WHERE FunctionName='RollbarEmailService'];
+    }
+
+    public static EmailServicesAddress emailServicesAddress(EmailServicesFunction emailFunction) {
+        return [SELECT Id, LocalPart, EmailDomainName FROM EmailServicesAddress WHERE FunctionId = :emailFunction.Id];
+    }
+
+    public static ApexEmailNotification apexEmailNotification() {
         EmailServicesFunction emailFunction;
         EmailServicesAddress emailServicesAddress;
         try {
-            emailFunction = [SELECT Id FROM EmailServicesFunction WHERE FunctionName='RollbarEmailService'];
-            emailServicesAddress = [SELECT Id, LocalPart, EmailDomainName FROM EmailServicesAddress WHERE FunctionId = :emailFunction.Id];
+            emailFunction = emailServicesFunction();
+            emailServicesAddress = emailServicesAddress(emailFunction);
         } catch (Exception ex) {
-            return false;
+            return null;
         }
 
         String emailServiceAddress = emailServicesAddress.LocalPart + '@' + emailServicesAddress.EmailDomainName;
 
-        Boolean forwarding = false;
         ApexEmailNotification[] apexNotifications = [SELECT Email, UserId FROM ApexEmailNotification];
         for (ApexEmailNotification notification : apexNotifications) {
             if (notification.Email == emailServiceAddress) {
-                forwarding = true;
+                return notification;
             }
         }
 
-        return forwarding;
+        return null; // Not found
+    }
+
+    public static Boolean apexNotificationsForwardingSetUp()
+    {
+        ApexEmailNotification notification = apexEmailNotification();
+
+        if (notification != null) {
+            return true;
+        }
+        return false;
+    }
+
+    public static void deleteApexEmailNotification() {
+        ApexEmailNotification notification = ApexEmailNotification();
+
+        if (notification != null) {
+            String baseUrl = URL.getSalesforceBaseUrl().toExternalForm() + '/services/data/v35.0/tooling/';
+
+            HTTPRequest req = new HTTPRequest();
+            req.setEndpoint(baseUrl + 'sobjects/ApexEmailNotification/' + notification.Id + '/');
+            req.setMethod('DELETE');
+            req.setHeader('Authorization', 'Bearer ' + UserInfo.getSessionId());
+            req.setHeader('Content-Type', 'application/json');
+
+            Http h = new Http();
+            HttpResponse res = h.send(req);
+        }
+    }
+
+    public static void deleteEmailServicesFunction() {
+        EmailServicesFunction emailServicesFunction = EmailServicesFunction();
+
+        if (emailServicesFunction != null) {
+            deleteEmailServicesAddress(emailServicesFunction);
+
+            EmailServiceInstaller.deleteEmailServiceFunction(emailServicesFunction);
+        }
+    }
+
+    public static void deleteEmailServicesAddress(EmailServicesFunction emailServicesFunction) {
+        EmailServicesAddress emailServicesAddress = EmailServicesAddress(emailServicesFunction);
+
+        if (emailServicesAddress != null) {
+            EmailServiceInstaller.deleteEmailServiceAddress(emailServicesAddress);
+        }
     }
 
     public static Boolean accessTokenCorrect(Config config)

@@ -88,4 +88,66 @@ public with sharing class EmailServiceInstaller {
         Http h = new Http();
         HttpResponse res = h.send(req);
     }
+
+    public static void deleteEmailServiceFunction(EmailServicesFunction emailServiceFunction)
+    {
+        String baseUrl = URL.getOrgDomainUrl().toExternalForm() + '/services/Soap/u/48.0';
+
+        HTTPRequest req = new HTTPRequest();
+        req.setEndpoint(baseUrl);
+        req.setMethod('POST');
+        req.setHeader('SOAPAction', '""');
+        req.setHeader('Content-Type', 'text/xml');
+        req.setBody(
+            '<?xml version="1.0" encoding="utf-8"?>' +
+              '<env:Envelope xmlns:env="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:partner.soap.sforce.com">' +
+                '<env:Header>' +
+                    '<urn:SessionHeader>' +
+                        '<urn:sessionId>'+UserInfo.getSessionId()+'</urn:sessionId>' +
+                    '</urn:SessionHeader>' +
+                '</env:Header>' +
+                '<env:Body>' +
+                    '<urn:delete>' +
+                        '<urn:ids>' +
+                            emailServiceFunction.Id +
+                        '</urn:ids>' +
+                    '</urn:delete>' +
+                '</env:Body>' +
+            '</env:Envelope>'
+        );
+
+        Http h = new Http();
+        HttpResponse res = h.send(req);
+    }
+
+    public static void deleteEmailServiceAddress(EmailServicesAddress emailServiceAddress)
+    {
+        String baseUrl = URL.getOrgDomainUrl().toExternalForm() + '/services/Soap/u/48.0';
+
+        HTTPRequest req = new HTTPRequest();
+        req.setEndpoint(baseUrl);
+        req.setMethod('POST');
+        req.setHeader('SOAPAction', '""');
+        req.setHeader('Content-Type', 'text/xml');
+        req.setBody(
+            '<?xml version="1.0" encoding="utf-8"?>' +
+              '<env:Envelope xmlns:env="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:partner.soap.sforce.com">' +
+                '<env:Header>' +
+                    '<urn:SessionHeader>' +
+                        '<urn:sessionId>'+UserInfo.getSessionId()+'</urn:sessionId>' +
+                    '</urn:SessionHeader>' +
+                '</env:Header>' +
+                '<env:Body>' +
+                    '<urn:delete>' +
+                        '<urn:ids>' +
+                            emailServiceAddress.Id +
+                        '</urn:ids>' +
+                    '</urn:delete>' +
+                '</env:Body>' +
+            '</env:Envelope>'
+        );
+
+        Http h = new Http();
+        HttpResponse res = h.send(req);
+    }
 }
