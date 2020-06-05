@@ -81,7 +81,10 @@ public with sharing class DataBuilder {
         structure.put('environment', environment);
         structure.put('framework', 'apex');
         structure.put('body', body);
-        structure.put('custom', custom);
+
+        if (custom != null) {
+            structure.put('custom', custom);
+        }
 
         return structure;
     }
