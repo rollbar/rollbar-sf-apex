@@ -11,6 +11,8 @@ public class DataBuilderTest
 
         Map<String, Object> data = (Map<String, Object>)result.get('data');
 
+        System.assertEquals(data.containsKey('custom'), false);
+
         Map<String, Object> notifierMap = (Map<String, Object>)data.get('notifier');
 
         System.assertEquals(Notifier.NAME, (String)notifierMap.get('name'));
@@ -86,6 +88,8 @@ public class DataBuilderTest
             Map<String, Object> result = subject.buildPayload('error', exc, null);
 
             Map<String, Object> data = (Map<String, Object>)result.get('data');
+
+            System.assertEquals(data.containsKey('custom'), false);
 
             Map<String, Object> notifierMap = (Map<String, Object>)data.get('notifier');
             System.assertEquals(Notifier.NAME, (String)notifierMap.get('name'));
