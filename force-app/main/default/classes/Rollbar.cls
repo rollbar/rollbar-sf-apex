@@ -23,7 +23,7 @@ global with sharing class Rollbar {
     public static Rollbar init()
     {
         return Rollbar.init(
-            RollbarSettings__c.getInstance().AccessToken__c,
+            RollbarSettings__c.getOrgDefaults().AccessToken__c,
             UserInfo.getOrganizationName()
         );
     }
