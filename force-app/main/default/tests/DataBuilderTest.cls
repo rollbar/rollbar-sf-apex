@@ -213,4 +213,51 @@ public class DataBuilderTest
         System.assertEquals(expected.get('line'), frameMap.get('lineno'));
         System.assertEquals(expected.get('column'), frameMap.get('colno'));
     }
+
+    @isTest
+    static void testBuildEachFrameType()
+    {
+        String[] input = new String[]{
+            'Class.HelloWorld.hello: line 32, column 1', // Normal class context
+            'Trigger.Log: line 8, column 1', // Trigger context
+            'AnonymousBlock: line 2, column 1', // Anonymous context
+            '(rollbar)', // Stripped frame
+            'Class: line 32', // Invalid
+            'Trigger: column 1' // Invalid
+        };
+
+        List <Map<String, Object>> output = new List <Map<String, Object>> {
+            new Map<String, Object>{
+                'class_name' => 'HelloWorld', 'method' => 'hello', 'lineno' => 32, 'colno' => 1
+            },
+            new Map<String, Object>{
+                'class_name' => 'Trigger', 'method' => 'Log', 'lineno' => 8, 'colno' => 1
+            },
+            new Map<String, Object>{
+                'class_name' => 'Unknown', 'method' => 'AnonymousBlock', 'lineno' => 2, 'colno' => 1
+            },
+            new Map<String, Object>{
+                'class_name' => 'Unknown', 'method' => '(rollbar)', 'lineno' => '(unknown)', 'colno' => '(unknown)'
+            },
+            new Map<String, Object>{
+                'class_name' => '(unknown)', 'method' => '(unknown)', 'lineno' => 32, 'colno' => '(unknown)'
+            },
+            new Map<String, Object>{
+                'class_name' => 'Trigger', 'method' => '(unknown)', 'lineno' => '(unknown)', 'colno' => 1
+            }
+        };
+
+        DataBuilder subject = new DataBuilder(new Config('foo', 'bar'));
+
+        for(Integer i = 0; i < input.size(); i++){
+            Map<String, Object> result = subject.buildTraceBody(input[i], 'Exception', 'Error message');
+            Map<String, Object> trace = (Map<String, Object>)result.get('trace');
+            Map<String, Object> frame = ((List<Map<String, Object>>)trace.get('frames'))[0];
+
+            System.assertEquals(frame.get('class_name'), output[i].get('class_name'));
+            System.assertEquals(frame.get('method'), output[i].get('method'));
+            System.assertEquals(frame.get('lineno'), output[i].get('lineno'));
+            System.assertEquals(frame.get('colno'), output[i].get('colno'));
+        }
+    }
 }
