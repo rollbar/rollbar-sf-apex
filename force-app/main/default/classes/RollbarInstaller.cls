@@ -64,13 +64,11 @@ public with sharing class RollbarInstaller {
     {
         if (!rollbarApiEndpointAllowed(apiDomain)) {
             MetadataService.createRemoteSiteSetting('RollbarAPI', apiDomain);
-
-            settings.SalesforceApiEnabled__c = metadataApiAllowed();
-            settings.RollbarApiEnabled__c = rollbarApiEndpointAllowed(apiDomain);
-            settings.RollbarNetworkAccess__c = rollbarPingSuccessful();
-        } else if (!settings.RollbarNetworkAccess__c) {
-            settings.RollbarNetworkAccess__c = rollbarPingSuccessful();
         }
+
+        settings.SalesforceApiEnabled__c = metadataApiAllowed();
+        settings.RollbarApiEnabled__c = rollbarApiEndpointAllowed(apiDomain);
+        settings.RollbarNetworkAccess__c = rollbarPingSuccessful();
     }
 
     public static void enableApexNotificationsForwarding(RollbarSettings__c settings)
