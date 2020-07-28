@@ -174,7 +174,7 @@
                             <apex:inputText value="{!accessToken}" id="rollbarAccessToken" html-placeholder="Rollbar Access Token" />
                         </p>
                         <div class="next-step">
-                            <apex:commandButton action="{!save}" value="Save and Verify" id="rollbarConfigure" reRender="setup" />
+                            <apex:commandButton action="{!verifyToken}" value="Save and Verify" id="rollbarConfigure" reRender="setup" />
                         </div>
                     </apex:form>
                 </apex:outputPanel>
@@ -205,13 +205,34 @@
                 <apex:outputPanel rendered="{!configState == 'ConfigState.COMPLETE'}" layout="block">
                     <div class="section">
                         <div class="section">
-                            <h4>Update Rollbar Token</h4>
+                            <h4>Update Settings</h4>
                             <apex:form>
+                                <p>
+                                    <apex:inputCheckbox value="{!reportUncaughtExceptions}" label="Report Uncaught Exceptions" />
+                                    <span>Report Uncaught Exceptions</span>
+                                </p>
+                                <p>
+                                    <apex:inputCheckbox value="{!reportFlowErrors}" label="Report Flow Errors" />
+                                    <span>Report Flow Errors</span>
+                                </p>
+                                <p>
+                                    <apex:inputCheckbox value="{!reportUnknownEmailType}" label="Report Unknown Error Emails" />
+                                    <span>Report Unknown Error Emails</span>
+                                </p>
+                                <p>
+                                    <apex:inputCheckbox value="{!sendReports}" label="Send Events To Rollbar" />
+                                    <span>Send Events To Rollbar</span>
+                                </p>
+                                <p>
+                                    <h4>Environment</h4>
+                                    <apex:inputText value="{!environment}" id="rollbarEnvironment" html-placeholder="Rollbar Environment" />
+                                </p>
                                 <p class="center">
+                                    <h4>Access Token</h4>
                                     <apex:inputText value="{!accessToken}" id="rollbarAccessToken" html-placeholder="Rollbar Access Token" />
                                 </p>
                                 <div class="next-step">
-                                    <apex:commandButton action="{!save}" value="Update and Verify" id="rollbarConfigure" reRender="setup" />
+                                    <apex:commandButton action="{!updateSettings}" value="Update" id="rollbarConfigure" reRender="setup" />
                                 </div>
                             </apex:form>
                         </div>

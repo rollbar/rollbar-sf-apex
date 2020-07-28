@@ -26,6 +26,8 @@ public with sharing class Notifier
 
     public HttpResponse send(Map<String, Object> payload, SendMethod method)
     {
+        if(!RollbarSettings__c.getOrgDefaults().SendReports__c) { return null; }
+
         return methodSend(JSON.serialize(payload), method);
     }
 
@@ -74,6 +76,10 @@ public with sharing class Notifier
         HttpResponse response = http.send(request);
 
         return response;
+    }
+
+    public Config config() {
+        return config;
     }
 
     private Config config;
