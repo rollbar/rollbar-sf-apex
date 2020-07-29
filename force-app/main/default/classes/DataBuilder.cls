@@ -131,11 +131,22 @@ public with sharing class DataBuilder {
 
     private Map<String, Object> buildTraceBody(Exception exc)
     {
+        String stackTraceString = exc.getStackTraceString();
+        String typeName = exc.getTypeName();
+        String message = exc.getMessage();
+
+        return buildTraceBody(stackTraceString, typeName, message);
+
+    }
+
+    @testVisible
+    private Map<String, Object> buildTraceBody(String stackTraceString, String typeName, String message)
+    {
         List<Map<String, Object>> framesList = new List<Map<String, Object>>();
 
-        String[] frames = exc.getStackTraceString().split('\n');
+        String[] frames = stackTraceString.split('\n');
         for (String frameStr : frames) {
-            if (frameStr == '()') {
+            if (frameStr == '()' || frameStr == '') {
                 continue;
             } else if (frameStr.toLowerCase() == 'caused by') {
                 break;
@@ -144,32 +155,58 @@ public with sharing class DataBuilder {
             Map<String, Object> frameMap = new Map<String, Object>();
             frameMap.put('filename', frameStr);
 
-            String className = frameStr.split(':')[0];
-            String methodName = '';
-            if (className != 'AnonymousBlock') {
-                className = className.split('\\.')[1];
-                methodName = frameStr.split(':')[0].split('\\.')[2];
+            String[] location = frameStr.split(':')[0].split('\\.');
+            Integer locationLength = location.size();
+            String className = '(unknown)';
+            String methodName = '(unknown)';
+            switch on location[0] {
+                when 'Class' {
+                    if (locationLength > 1) {
+                        className = location[1];
+                    }
+                    if (locationLength > 2) {
+                        methodName = location[2];
+                    }
+                }
+                when 'Trigger' {
+                    className = 'Trigger';
+                    if (locationLength > 1) {
+                        methodName = location[1];
+                    }
+                }
+                when else { // e.g. "AnonymousBlock"
+                    className = 'Unknown';
+                    methodName = location[0];
+                }
             }
 
             frameMap.put('class_name', className);
             frameMap.put('method', methodName);
 
-            Pattern linePattern = Pattern.compile('line (\\d+)');
-            Matcher lineMatcher = linePattern.matcher(frameStr);
-            lineMatcher.find();
-            frameMap.put('lineno', Integer.valueOf(lineMatcher.group(1)));
+            try {
+                Pattern linePattern = Pattern.compile('line (\\d+)');
+                Matcher lineMatcher = linePattern.matcher(frameStr);
+                lineMatcher.find();
+                frameMap.put('lineno', Integer.valueOf(lineMatcher.group(1)));
+            } catch (StringException e) {
+                frameMap.put('lineno', '(unknown)');
+            }
 
-            Pattern colPattern = Pattern.compile('column (\\d+)');
-            Matcher colMatcher = colPattern.matcher(frameStr);
-            colMatcher.find();
-            frameMap.put('colno', Integer.valueOf(colMatcher.group(1)));
+            try {
+                Pattern colPattern = Pattern.compile('column (\\d+)');
+                Matcher colMatcher = colPattern.matcher(frameStr);
+                colMatcher.find();
+                frameMap.put('colno', Integer.valueOf(colMatcher.group(1)));
+            } catch (StringException e) {
+                frameMap.put('colno', '(unknown)');
+            }
 
             framesList.add(frameMap);
         }
 
         Map<String, Object> excMap = new Map<String, Object>();
-        excMap.put('class', exc.getTypeName());
-        excMap.put('message', exc.getMessage());
+        excMap.put('class', typeName);
+        excMap.put('message', message);
 
         return buildTraceStructure(excMap, framesList);
     }

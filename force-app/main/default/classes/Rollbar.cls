@@ -22,9 +22,11 @@ global with sharing class Rollbar {
 
     public static Rollbar init()
     {
+        RollbarSettings__c settings = RollbarSettings__c.getOrgDefaults();
+
         return Rollbar.init(
-            RollbarSettings__c.getOrgDefaults().AccessToken__c,
-            UserInfo.getOrganizationName()
+            settings.AccessToken__c,
+            settings.Environment__c
         );
     }
 
@@ -100,6 +102,10 @@ global with sharing class Rollbar {
 
     public Notifier notifier() {
         return notifier;
+    }
+
+    public Config config() {
+        return config;
     }
 
     private static Rollbar instance = null;

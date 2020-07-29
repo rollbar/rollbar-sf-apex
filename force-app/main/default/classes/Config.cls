@@ -4,7 +4,12 @@ public with sharing class Config {
             throw new RollbarNotInitializedException();
         }
         this.accessToken = accessToken;
-        this.environment = environment;
+
+        if (environment == null || environment == '') {
+            this.environment = UserInfo.getOrganizationName();
+        } else {
+            this.environment = environment;
+        }
     }
 
     public Config() {

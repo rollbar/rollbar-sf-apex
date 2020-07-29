@@ -1,6 +1,12 @@
 public with sharing class RollbarConfigureController {
 
     protected RollbarSettings__c settings { get; set; }
+
+    public Boolean reportUncaughtExceptions { get; set; }
+    public Boolean reportFlowErrors { get; set; }
+    public Boolean reportUnknownEmailType { get; set; }
+    public Boolean sendReports { get; set; }
+    public String environment { get; set; }
     public String accessToken {
         get {
             return this.settings.AccessToken__c;
@@ -21,6 +27,11 @@ public with sharing class RollbarConfigureController {
 
     public RollbarConfigureController() {
         this.settings = RollbarSettings__c.getOrgDefaults();
+        this.reportUncaughtExceptions = this.settings.ReportUncaughtExceptions__c;
+        this.reportFlowErrors = this.settings.ReportFlowErrors__c;
+        this.reportUnknownEmailType = this.settings.ReportUnknownEmailType__c;
+        this.sendReports = this.settings.SendReports__c;
+        this.environment = this.settings.Environment__c;
         updateConfigState();
     }
 
@@ -35,12 +46,12 @@ public with sharing class RollbarConfigureController {
         return null;
     }
 
-    public Pagereference save()
+    public Pagereference verifyToken()
     {
         String message;
 
         try {
-            Config config = new Config(this.accessToken, UserInfo.getOrganizationName());
+            Config config = new Config(this.accessToken, this.settings.Environment__c);
             message = RollbarInstaller.verifyToken(config);
         } catch (RollbarNotInitializedException e) {
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.Error, 'Provided access token is incorrect.'));
@@ -49,6 +60,27 @@ public with sharing class RollbarConfigureController {
             ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.Error, message));
         }
         this.settings = RollbarSettings__c.getOrgDefaults();
+        this.reportUncaughtExceptions = this.settings.ReportUncaughtExceptions__c;
+        this.reportFlowErrors = this.settings.ReportFlowErrors__c;
+        this.reportUnknownEmailType = this.settings.ReportUnknownEmailType__c;
+        this.sendReports = this.settings.SendReports__c;
+        this.environment = this.settings.Environment__c;
+        updateConfigState();
+        return null;
+    }
+
+    public Pagereference updateSettings()
+    {
+        String message;
+
+        this.settings = RollbarSettings__c.getOrgDefaults();
+        this.settings.ReportUncaughtExceptions__c = this.reportUncaughtExceptions;
+        this.settings.ReportFlowErrors__c = this.reportFlowErrors;
+        this.settings.ReportUnknownEmailType__c = this.reportUnknownEmailType;
+        this.settings.SendReports__c = this.sendReports;
+        this.settings.Environment__c = this.environment;
+        upsert this.settings;
+
         updateConfigState();
         return null;
     }

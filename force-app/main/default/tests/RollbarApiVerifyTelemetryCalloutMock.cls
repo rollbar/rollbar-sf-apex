@@ -5,7 +5,7 @@ global class RollbarApiVerifyTelemetryCalloutMock implements HttpCalloutMock {
         Map<String, Object> payload = (Map<String, Object>) JSON.deserializeUntyped(body);
         Map<String, Object> data = (Map<String, Object>)payload.get('data');
         Map<String, Object> messageBody = (Map<String, Object>)data.get('body');
-        List<Map<String, Object>> telemetry = (List<Map<String, Object>>)messageBody.get('telemetry');
+        List<Object> telemetry = (List<Object>)messageBody.get('telemetry');
 
         System.assert(telemetry.size() > 0);
 

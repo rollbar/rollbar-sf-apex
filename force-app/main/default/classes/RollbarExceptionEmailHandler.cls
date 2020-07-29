@@ -32,6 +32,7 @@ global class RollbarExceptionEmailHandler implements Messaging.InboundEmailHandl
   }
 
     private void parseAndSend(Messaging.InboundEmail email) {
+        RollbarSettings__c settings = RollbarSettings__c.getOrgDefaults();
         String emailBody = '';
 
         Rollbar.init();
@@ -39,16 +40,22 @@ global class RollbarExceptionEmailHandler implements Messaging.InboundEmailHandl
         // The fromName field is the most reliable known way to differentiate
         // Exception and Flow email types.
         if (email.fromName == ExceptionEmailParser.fromName()) {
+            if (!settings.ReportUncaughtExceptions__c) { return; }
+
             emailBody = email.plainTextBody;
             ExceptionData exData = ExceptionEmailParser.parse(emailBody);
 
             Rollbar.log(exData);
         } else if (email.fromName == FlowEmailParser.fromName()) {
+            if (!settings.ReportFlowErrors__c) { return; }
+
             emailBody = email.htmlBody;
             List<Telemetry> telemetry = FlowEmailParser.parseTelemetry(emailBody);
 
             Rollbar.log('error', email.subject, null, telemetry, SendMethod.SYNC);
         } else {
+            if (!settings.ReportUnknownEmailType__c) { return; }
+
             // Unknown email type.
             // TODO: Use emailBody and fromName in notifier.diagnostic
 

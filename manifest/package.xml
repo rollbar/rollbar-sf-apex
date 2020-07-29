@@ -35,6 +35,7 @@
         <members>TelemetryTest</members>
 
         <!-- test helpers -->
+        <members>RollbarApiAssertNotCalledMock</members>
         <members>RollbarApiCalloutMock</members>
         <members>RollbarApiVerifyRequestCalloutMock</members>
         <members>RollbarApiVerifyTelemetryCalloutMock</members>
