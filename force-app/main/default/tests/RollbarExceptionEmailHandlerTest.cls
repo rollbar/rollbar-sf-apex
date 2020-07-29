@@ -3,7 +3,7 @@ private class RollbarExceptionEmailHandlerTest {
 
     @isTest
     public static void testFlowEmail() {
-        Test.setMock(HttpCalloutMock.class, new RollbarApiVerifyTelemetryCalloutMock());
+        RollbarTestHelper.setMock(new RollbarApiVerifyTelemetryCalloutMock());
 
         upsert new RollbarSettings__c(AccessToken__c = 'test-token', ReportFlowErrors__c = true);
 
@@ -23,7 +23,7 @@ private class RollbarExceptionEmailHandlerTest {
 
     @isTest
     public static void testFlowEmailDisabled() {
-        Test.setMock(HttpCalloutMock.class, new RollbarApiAssertNotCalledMock());
+        RollbarTestHelper.setMock(new RollbarApiAssertNotCalledMock());
 
         upsert new RollbarSettings__c(AccessToken__c = 'test-token', ReportFlowErrors__c = false);
 
