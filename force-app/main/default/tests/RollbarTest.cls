@@ -2,7 +2,7 @@
 public class RollbarTest {
     @isTest
     public static void testLogMessage() {
-        Test.setMock(HttpCalloutMock.class, new RollbarApiCalloutMock());
+        RollbarTestHelper.setDefaultMock();
 
         insert new RollbarSettings__c(SendReports__c = true);
 
@@ -16,7 +16,7 @@ public class RollbarTest {
 
     @isTest
     public static void testLogMessageFuture() {
-        Test.setMock(HttpCalloutMock.class, new RollbarApiVerifyRequestCalloutMock());
+        RollbarTestHelper.setMock(new RollbarApiVerifyRequestCalloutMock());
 
         insert new RollbarSettings__c(AccessToken__c = 'test-token', SendReports__c = true);
 
@@ -29,7 +29,7 @@ public class RollbarTest {
 
     @isTest
     public static void testLogMessageEvent() {
-        Test.setMock(HttpCalloutMock.class, new RollbarApiVerifyRequestCalloutMock());
+        RollbarTestHelper.setMock(new RollbarApiVerifyRequestCalloutMock());
 
         insert new RollbarSettings__c(AccessToken__c = 'test-token', SendReports__c = true);
 
@@ -42,7 +42,7 @@ public class RollbarTest {
 
     @isTest
     public static void testLogMessageWithCustomDataAndTelemetry() {
-        Test.setMock(HttpCalloutMock.class, new RollbarApiCalloutMock());
+        RollbarTestHelper.setDefaultMock();
 
         insert new RollbarSettings__c(SendReports__c = true);
 
@@ -65,7 +65,7 @@ public class RollbarTest {
 
     @isTest
     public static void testLogException() {
-        Test.setMock(HttpCalloutMock.class, new RollbarApiCalloutMock());
+        RollbarTestHelper.setDefaultMock();
 
         insert new RollbarSettings__c(SendReports__c = true);
 
@@ -79,7 +79,7 @@ public class RollbarTest {
 
     @isTest
     public static void testLogExceptionData() {
-        Test.setMock(HttpCalloutMock.class, new RollbarApiCalloutMock());
+        RollbarTestHelper.setDefaultMock();
 
         insert new RollbarSettings__c(SendReports__c = true);
 

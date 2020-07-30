@@ -3,7 +3,7 @@ public class NotifierTest {
     @isTest
     public static void testLogMessage(){
         insert new RollbarSettings__c(SendReports__c = true);
-        Test.setMock(HttpCalloutMock.class, new RollbarApiCalloutMock());
+        RollbarTestHelper.setDefaultMock();
 
         Config config = new Config('foo', 'bar');
 
@@ -31,7 +31,7 @@ public class NotifierTest {
     @isTest
     public static void testLogException(){
         insert new RollbarSettings__c(SendReports__c = true);
-        Test.setMock(HttpCalloutMock.class, new RollbarApiCalloutMock());
+        RollbarTestHelper.setDefaultMock();
 
         Config config = new Config('foo', 'bar');
 
@@ -61,7 +61,7 @@ public class NotifierTest {
     @isTest
     public static void testLogExceptionData(){
         insert new RollbarSettings__c(SendReports__c = true);
-        Test.setMock(HttpCalloutMock.class, new RollbarApiCalloutMock());
+        RollbarTestHelper.setDefaultMock();
 
         Config config = new Config('foo', 'bar');
 
@@ -101,7 +101,7 @@ public class NotifierTest {
     @isTest
     public static void testSendReportsDisabled(){
         insert new RollbarSettings__c(SendReports__c = false);
-        Test.setMock(HttpCalloutMock.class, new RollbarApiCalloutMock());
+        RollbarTestHelper.setDefaultMock();
 
         Config config = new Config('foo', 'bar');
 
