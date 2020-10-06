@@ -27,54 +27,36 @@ public with sharing class ExceptionEmailParser {
     // Not all emails will have the 'caused by' line, nor stack frame lines.
     // Some emails will have multiple context lines.
     //
-    private enum ParseState {START, CONTEXT, STACK, STOP}
+    private enum ParseState {USER_ORG, CONTEXT, STACK, STOP}
 
     private static Map<String, Object> parseLines(List<String> lines) {
         Map<String, Object> dataMap = new Map<String, Object>();
-        ParseState state = ParseState.START;
+        ParseState state = ParseState.USER_ORG;
         List<String> contextLines = new List<String>();
+        String prevLine = null;
 
         for (String line : lines) {
-            Boolean blank = String.isBlank(line);
+            if (String.isBlank(line)) { continue; }
 
-            if (blank) {
-                continue;
-            } else if (state == ParseState.START) { // look for user/org line
-                String userOrg = parseUserOrg(line);
-
-                // TODO: Support multi-line format
-                if (userOrg != null) {
-                    dataMap.put('organization', userOrg);
-                    state = ParseState.CONTEXT;
+            switch on state {
+                when USER_ORG {
+                    state = handleUserOrgLine(line, prevLine, dataMap);
+                    prevLine = line;
                 }
-            } else if (state == ParseState.CONTEXT) { // look for 'caused by' line
-                if (line.startsWith('caused by:')) {
-                    dataMap.put('className', parseClassName(line));
-                    dataMap.put('message', parseMessage(line));
-                    state = ParseState.STACK;
-                } else {
-                    // Add to context
-                    contextLines.add(line);
+                when CONTEXT {
+                    state = handleContextLine(line, contextLines, dataMap);
                 }
-            } else if (state == ParseState.STACK) { // look for first stack frame
-                String fileName = parseFileName(line);
-                Integer lineno = parseLineno(line);
-                Integer colno = parseColno(line);
-
-                if (lineno != null && colno != null) { // tolerates missing fileName
-                    dataMap.put('fileName', fileName);
-                    dataMap.put('line', lineno);
-                    dataMap.put('column', colno);
-                    state = ParseState.STOP;
+                when STACK {
+                    state = handleStackLine(line, dataMap);
                 }
-
-            } else { // end
-                break;
+                when STOP {
+                    break;
+                }
             }
         }
 
-        if (state == ParseState.START) {
-            // Handle unknown email format case where state is still 'start'.
+        if (state == ParseState.USER_ORG) {
+            // Handle unknown email format case where state is still USER_ORG.
             dataMap.put('message', 'Unknown Error');
             dataMap.put('context', String.join(lines, '\n'));
         } else {
@@ -82,6 +64,56 @@ public with sharing class ExceptionEmailParser {
         }
 
         return dataMap;
+    }
+
+    private static ParseState handleUserOrgLine(String line, String prevLine, Map<String, Object> dataMap) {
+        String userOrg = parseUserOrg(line);
+
+        if (userOrg != null && !String.isBlank(userOrg)) {
+            dataMap.put('organization', userOrg);
+            return ParseState.CONTEXT;
+        }
+
+        // The user/org data may span two lines.
+        // Try concatenating with the previous line.
+        if (prevLine != null){
+            userOrg = parseUserOrg(prevLine + ' ' + line);
+
+            if (userOrg != null) {
+                dataMap.put('organization', userOrg);
+                return ParseState.CONTEXT;
+            }
+        }
+
+        return ParseState.USER_ORG;
+    }
+
+    private static ParseState handleContextLine(String line, List<String> contextLines, Map<String, Object> dataMap) {
+        if (line.startsWith('caused by:')) {
+            dataMap.put('className', parseClassName(line));
+            dataMap.put('message', parseMessage(line));
+            return ParseState.STACK;
+        } else {
+            // Add to context
+            contextLines.add(line);
+        }
+
+        return ParseState.CONTEXT;
+    }
+
+    private static ParseState handleStackLine(String line, Map<String, Object> dataMap) {
+        String fileName = parseFileName(line);
+        Integer lineno = parseLineno(line);
+        Integer colno = parseColno(line);
+
+        if (lineno != null && colno != null) { // tolerates missing fileName
+            dataMap.put('fileName', fileName);
+            dataMap.put('line', lineno);
+            dataMap.put('column', colno);
+            return ParseState.STOP;
+        }
+
+        return ParseState.STACK;
     }
 
     public static String parseUserOrg(String line) {

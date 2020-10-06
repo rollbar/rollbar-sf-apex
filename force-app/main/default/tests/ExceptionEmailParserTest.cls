@@ -23,6 +23,27 @@ public class ExceptionEmailParserTest {
     }
 
     @isTest
+    public static void testParseMultiLineUser() {
+        String emailBody =
+            'Apex script unhandled exception by user/organization:' + '\n' +
+            '0050R000001t3Br/00D0R000000DUxZ' + '\n\n' +
+            'ContactEx: execution of AfterInsert' + '\n\n' +
+            'caused by: System.NullPointerException: Attempt to de-reference a null object' + '\n\n' +
+            'Trigger.ContactEx: line 3, column 1';
+
+        ExceptionData exData = ExceptionEmailParser.parse(emailBody);
+
+        System.assertEquals(null, exData.environment());
+        System.assertEquals('0050R000001t3Br/00D0R000000DUxZ', exData.userOrg());
+        System.assertEquals('System.NullPointerException', exData.className());
+        System.assertEquals('Attempt to de-reference a null object', exData.message());
+        System.assertEquals('Trigger.ContactEx', exData.fileName());
+        System.assertEquals('ContactEx: execution of AfterInsert', exData.context());
+        System.assertEquals(3, exData.line());
+        System.assertEquals(1, exData.column());
+    }
+
+    @isTest
     public static void testParseNoStack() {
         String emailBody =
             'Sandbox\n\n' +
@@ -49,6 +70,18 @@ public class ExceptionEmailParserTest {
         ExceptionData exData = ExceptionEmailParser.parse(emailBody);
 
         System.assertEquals('0050R000001t3Br/00D0R000000DUxZ', exData.userOrg());
+        System.assertEquals('Failed to process batch for class \'G2Crowd.CalculateAccountAveragesBatch\' for job id \'8061F00001btixO\'', exData.context());
+    }
+
+    @isTest
+    public static void testParseUnknownFormat() {
+        String emailBody =
+            'Failed to process batch for class \'G2Crowd.CalculateAccountAveragesBatch\' for job id \'8061F00001btixO\'';
+
+        ExceptionData exData = ExceptionEmailParser.parse(emailBody);
+
+        System.assertEquals(null, exData.userOrg());
+        System.assertEquals('Unknown Error', exData.message());
         System.assertEquals('Failed to process batch for class \'G2Crowd.CalculateAccountAveragesBatch\' for job id \'8061F00001btixO\'', exData.context());
     }
 
