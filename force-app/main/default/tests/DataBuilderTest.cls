@@ -6,8 +6,9 @@ public class DataBuilderTest
     {
         DataBuilder subject = new DataBuilder(new Config('foo', 'bar'));
         String expected = 'Message built in DataBuilderTest';
+        Item item = new Item(expected);
 
-        Map<String, Object> result = subject.buildPayload('info', expected, null, null);
+        Map<String, Object> result = subject.buildPayload('info', item);
 
         Map<String, Object> data = (Map<String, Object>)result.get('data');
 
@@ -43,8 +44,10 @@ public class DataBuilderTest
             987654321,
             new Map<String, String>{ 'message' => 'second' }
         ));
+        Item item = new Item('Telemetry test');
+        item.telemetry = telemetryList;
 
-        Map<String, Object> result = subject.buildPayload('info', 'Telemetry test', null, telemetryList);
+        Map<String, Object> result = subject.buildPayload('info', item);
 
         Map<String, Object> data = (Map<String, Object>)result.get('data');
         Map<String, Object> body = (Map<String, Object>)data.get('body');
@@ -85,7 +88,8 @@ public class DataBuilderTest
             expectedClass = exc.getTypeName();
             throw exc;
         } catch(Exception exc) {
-            Map<String, Object> result = subject.buildPayload('error', exc, null);
+            Item item = new Item(exc);
+            Map<String, Object> result = subject.buildPayload('error', item);
 
             Map<String, Object> data = (Map<String, Object>)result.get('data');
 
@@ -117,8 +121,10 @@ public class DataBuilderTest
         expectedCustom.put('foo', 'bar');
 
         DataBuilderTestException exc = new DataBuilderTestException('foobar');
+        Item item = new Item(exc);
+        item.custom = expectedCustom;
 
-        Map<String, Object> result = subject.buildPayload('error', exc, expectedCustom);
+        Map<String, Object> result = subject.buildPayload('error', item);
         Map<String, Object> data = (Map<String, Object>)result.get('data');
         Map<String, Object> custom = (Map<String, Object>)data.get('custom');
 
@@ -144,8 +150,9 @@ public class DataBuilderTest
             }
         } catch(Exception exc1) {
             expectedClass1 = exc1.getTypeName();
+            Item item = new Item(exc1);
 
-            Map<String, Object> result = subject.buildPayload('error', exc1, null);
+            Map<String, Object> result = subject.buildPayload('error', item);
 
             Map<String, Object> data = (Map<String, Object>)result.get('data');
 
@@ -184,8 +191,9 @@ public class DataBuilderTest
         expected.put('column', 12);
 
         ExceptionData exData = ExceptionData.fromMap(expected);
+        Item item = new Item(exData);
 
-        Map<String, Object> result = subject.buildPayload(exData);
+        Map<String, Object> result = subject.buildPayload('error', item);
 
         Map<String, Object> data = (Map<String, Object>)result.get('data');
 

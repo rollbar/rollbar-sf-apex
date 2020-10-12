@@ -43,26 +43,30 @@ global with sharing class Rollbar {
     }
 
     global static HttpResponse log(String level, String message) {
-        return log(level, message, null, null, null);
+        return log(level, message, null, null);
     }
 
     global static HttpResponse log(String level, String message, Map<String, Object> custom) {
-        return log(level, message, custom, null, null);
+        return log(level, message, custom, null);
     }
 
     global static HttpResponse log(String level, String message, SendMethod method) {
-        return log(level, message, null, null, method);
+        return log(level, message, null, method);
     }
 
     global static HttpResponse log(String level, String message, Map<String, Object> custom, SendMethod method) {
-        return log(level, message, custom, null, method);
+        Item item = new Item(message);
+        item.custom = custom;
+
+        return log(level, item, method);
     }
 
-    // Keep this unpublished (public, not global) until Telemetry interface can be frozen,
+    // Keep this unpublished (public, not global) until Item interface can be frozen,
     // which might be never.
-    public static HttpResponse log(String level, String message, Map<String, Object> custom, List<Telemetry> telemetry, SendMethod method) {
+    public static HttpResponse log(String level, Item item, SendMethod method) {
         Rollbar instance = initializedInstance();
-        return instance.notifier.log(level, message, custom, telemetry, method);
+
+        return instance.notifier.log(level, item, method);
     }
 
     global static HttpResponse log(Exception exc) {
@@ -78,13 +82,16 @@ global with sharing class Rollbar {
     }
 
     global static HttpResponse log(Exception exc, Map<String, Object> custom, SendMethod method) {
-        Rollbar instance = initializedInstance();
-        return instance.notifier.log('error', exc, custom, method);
+        Item item = new Item(exc);
+        item.custom = custom;
+
+        return log('error', item, method);
     }
 
     global static HttpResponse log(ExceptionData exData) {
-        Rollbar instance = initializedInstance();
-        return instance.notifier.log(exData, SendMethod.SYNC);
+        Item item = new Item(exData);
+
+        return log('error', item, SendMethod.SYNC);
     }
 
     public static Rollbar initializedInstance()

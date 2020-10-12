@@ -41,13 +41,12 @@ public class RollbarTest {
     }
 
     @isTest
-    public static void testLogMessageWithCustomDataAndTelemetry() {
+    public static void testLogMessageWithCustomData() {
         RollbarTestHelper.setDefaultMock();
 
         insert new RollbarSettings__c(SendReports__c = true);
 
         Map<String, Object> customData = new Map<String, Object>{ 'foo' => 'bar' };
-        List<Telemetry> telemetryList = new List<Telemetry>();
 
         Test.startTest();
         Rollbar.init('test-token', 'test-env');
@@ -55,7 +54,6 @@ public class RollbarTest {
             'info',
             'Message from the Apex SDK',
             customData,
-            telemetryList,
             SendMethod.SYNC
         );
         Test.stopTest();

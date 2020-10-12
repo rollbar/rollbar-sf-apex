@@ -45,21 +45,33 @@ global class RollbarExceptionEmailHandler implements Messaging.InboundEmailHandl
             emailBody = email.plainTextBody;
             ExceptionData exData = ExceptionEmailParser.parse(emailBody);
 
-            Rollbar.log(exData);
+            Item item = new Item(exData);
+            item.isUncaught = true;
+            item.diagnostic.put('emailBody', emailBody);
+
+            Rollbar.log('error', item, SendMethod.SYNC);
         } else if (email.fromName == FlowEmailParser.fromName()) {
             if (!settings.ReportFlowErrors__c) { return; }
 
             emailBody = email.htmlBody;
             List<Telemetry> telemetry = FlowEmailParser.parseTelemetry(emailBody);
 
-            Rollbar.log('error', email.subject, null, telemetry, SendMethod.SYNC);
+            Item item = new Item(email.subject);
+            item.isUncaught = true;
+            item.telemetry = telemetry;
+            item.diagnostic.put('emailBody', emailBody);
+
+            Rollbar.log('error', item, SendMethod.SYNC);
         } else {
             if (!settings.ReportUnknownEmailType__c) { return; }
 
             // Unknown email type.
-            // TODO: Use emailBody and fromName in notifier.diagnostic
+            Item item = new Item(email.subject);
+            item.isUncaught = true;
+            item.diagnostic.put('emailBody', emailBody);
+            item.diagnostic.put('fromName', email.fromName);
 
-            Rollbar.log('error', email.subject, null, null, SendMethod.SYNC);
+            Rollbar.log('error', item, SendMethod.SYNC);
         }
     }
 
