@@ -1,6 +1,28 @@
 @isTest
 public class DataBuilderTest
 {
+    static User insertUser(String userAlias) {
+        Profile p = [SELECT Id FROM Profile WHERE Name='Standard User'];
+        Blob b = Crypto.GenerateAESKey(128);
+        String username = EncodingUtil.ConvertTohex(b) + '@example.com';
+
+        User u = new User(
+            Alias = userAlias,
+            Email = userAlias + '@example.com',
+            EmailEncodingKey = 'UTF-8',
+            LastName = 'Tester',
+            LanguageLocaleKey = 'en_US',
+            LocaleSidKey = 'en_US',
+            ProfileId = p.Id,
+            TimeZoneSidKey = 'America/Los_Angeles',
+            UserName = username
+        );
+
+         insert(u);
+
+         return u;
+    }
+
     @isTest
     static void testBuildMessagePayload()
     {
@@ -8,9 +30,19 @@ public class DataBuilderTest
         String expected = 'Message built in DataBuilderTest';
         Item item = new Item(expected);
 
-        Map<String, Object> result = subject.buildPayload('info', item);
+        User testUser = insertUser('test1');
+        Map<String, Object> result;
+
+        System.runAs(testUser) {
+            result = subject.buildPayload('info', item);
+        }
 
         Map<String, Object> data = (Map<String, Object>)result.get('data');
+
+        Map<String, Object> person = (Map<String, Object>)data.get('person');
+        System.assertEquals(testUser.Id, (String)person.get('id'));
+        System.assertEquals(testUser.Username, (String)person.get('username'));
+        System.assertEquals(testUser.Email, (String)person.get('email'));
 
         System.assertEquals(data.containsKey('custom'), false);
 
@@ -46,10 +78,20 @@ public class DataBuilderTest
         ));
         Item item = new Item('Telemetry test');
         item.telemetry = telemetryList;
+        item.isUncaught = true; // Make item look like a Flow error
+
+        User testUser = insertUser('test2');
+        item.personId = testUser.Id;
 
         Map<String, Object> result = subject.buildPayload('info', item);
 
         Map<String, Object> data = (Map<String, Object>)result.get('data');
+
+        Map<String, Object> person = (Map<String, Object>)data.get('person');
+        System.assertEquals(testUser.Id, (String)person.get('id'));
+        System.assertEquals(testUser.Username, (String)person.get('username'));
+        System.assertEquals(testUser.Email, (String)person.get('email'));
+
         Map<String, Object> body = (Map<String, Object>)data.get('body');
 
         List<Map<String, Object>> telemetryObjects = new List<Map<String, Object>>();
@@ -192,6 +234,10 @@ public class DataBuilderTest
 
         ExceptionData exData = ExceptionData.fromMap(expected);
         Item item = new Item(exData);
+        item.isUncaught = true;
+
+        User testUser = insertUser('test3');
+        item.personId = testUser.Id;
 
         Map<String, Object> result = subject.buildPayload('error', item);
 
@@ -200,6 +246,11 @@ public class DataBuilderTest
         Map<String, Object> custom = (Map<String, Object>)data.get('custom');
 
         System.assertEquals((String)expected.get('context'), (String)custom.get('context'));
+
+        Map<String, Object> person = (Map<String, Object>)data.get('person');
+        System.assertEquals(testUser.Id, (String)person.get('id'));
+        System.assertEquals(testUser.Username, (String)person.get('username'));
+        System.assertEquals(testUser.Email, (String)person.get('email'));
 
         Map<String, Object> notifierMap = (Map<String, Object>)data.get('notifier');
         System.assertEquals(Notifier.NAME, (String)notifierMap.get('name'));

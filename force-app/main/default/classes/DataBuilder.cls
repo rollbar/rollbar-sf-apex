@@ -30,6 +30,9 @@ public with sharing class DataBuilder {
             data.put('custom', item.custom);
         }
 
+        // TODO: if config.personData
+        data.put('person', buildPersonData(item));
+
         return data;
     }
 
@@ -220,6 +223,45 @@ public with sharing class DataBuilder {
         }
 
         return telemetryList;
+    }
+
+    private Map<String, Object> buildPersonData(Item item) {
+        if (item.isUncaught) {
+            // The uncaught error handlers won't have anything meaningful at
+            // UserInfo. Use the provided personId instead.
+            return buildPersonDataFromId(item.personId);
+        }
+
+        return buildCurrentPersonData();
+    }
+
+    private Map<String, Object> buildCurrentPersonData() {
+        Map<String, Object> data = new Map<String, Object>();
+
+        data.put('id', UserInfo.getUserId());
+        data.put('username', UserInfo.getUserName());
+        data.put('email', UserInfo.getUserEmail());
+
+        return data;
+    }
+
+    private Map<String, Object> buildPersonDataFromId(String personId) {
+        Map<String, Object> data = new Map<String, Object>();
+
+        if (personId != null) {
+
+            User u = [
+                SELECT Email, Username FROM User
+                WHERE Id = :personId
+                LIMIT 1
+            ];
+
+            data.put('id', personId);
+            data.put('username', u.Username);
+            data.put('email', u.Email);
+        }
+
+        return data; // return the map whether filled or empty
     }
 
     private Config config;
