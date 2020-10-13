@@ -34,7 +34,8 @@ public class FlowEmailParserTest {
 
     @isTest
     public static void testParse() {
-        List<Telemetry> telemetryList = FlowEmailParser.parseTelemetry(emailBody);
+        FlowEmailParser flowParser = new FlowEmailParser(emailBody);
+        List<Telemetry> telemetryList = flowParser.parseTelemetry();
 
         System.assertEquals(telemetryList.size(), 4);
 
@@ -54,5 +55,7 @@ public class FlowEmailParserTest {
         // Confirm handling of unexpected <>
         System.assert(telemetryList.get(1).body.get('message').contains('Change Process'));
         System.assert(telemetryList.get(1).body.get('message').contains('<>'));
+
+        System.assertEquals(flowParser.currentUserId, '0056g0000067Oja');
     }
 }

@@ -47,6 +47,7 @@ global class RollbarExceptionEmailHandler implements Messaging.InboundEmailHandl
 
             Item item = new Item(exData);
             item.isUncaught = true;
+            item.personId = exData.userId();
             item.diagnostic.put('emailBody', emailBody);
 
             Rollbar.log('error', item, SendMethod.SYNC);
@@ -54,10 +55,12 @@ global class RollbarExceptionEmailHandler implements Messaging.InboundEmailHandl
             if (!settings.ReportFlowErrors__c) { return; }
 
             emailBody = email.htmlBody;
-            List<Telemetry> telemetry = FlowEmailParser.parseTelemetry(emailBody);
+            FlowEmailParser flowParser = new FlowEmailParser(emailBody);
+            List<Telemetry> telemetry = flowParser.parseTelemetry();
 
             Item item = new Item(email.subject);
             item.isUncaught = true;
+            item.personId = flowParser.currentUserId;
             item.telemetry = telemetry;
             item.diagnostic.put('emailBody', emailBody);
 

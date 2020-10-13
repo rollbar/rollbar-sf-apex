@@ -1,5 +1,12 @@
 public with sharing class FlowEmailParser {
-    public static List<Telemetry> parseTelemetry(String emailBody) {
+    private String emailBody;
+    public String currentUserId { get; private set; }
+
+    public FlowEmailParser(String emailBody) {
+        this.emailBody =  emailBody;
+    }
+
+    public List<Telemetry> parseTelemetry() {
         List<String> lines = emailBody.split('\n');
 
         return parseLines(lines);
@@ -18,7 +25,7 @@ public with sharing class FlowEmailParser {
     // This parser converts each block into a 'log' telemetry event.
     // Telemetry messages don't render line breaks, so we use punctuation to
     // format the message and improve readability.
-    private static List<Telemetry> parseLines(List<String> lines) {
+    private List<Telemetry> parseLines(List<String> lines) {
         List<Telemetry> telemetryList = new List<Telemetry>();
         Boolean blank = true;
         Boolean prevBlank = true;
@@ -40,6 +47,9 @@ public with sharing class FlowEmailParser {
                 messageLines = new List<String>();
             } else if (!prevBlank && !blank) { // continue block
                 messageLines.add(plain);
+
+                // Assume any internal line might be the user id
+                extractUserId(plain);
             } else { // end block
                 String message = messageFirstLine + String.join(messageLines, ', ');
                 telemetryList.add(addMessage(message));
@@ -50,7 +60,7 @@ public with sharing class FlowEmailParser {
         return telemetryList;
     }
 
-    private static Telemetry addMessage(String message) {
+    private Telemetry addMessage(String message) {
         return new Telemetry(
             'info',
             'log',
@@ -67,11 +77,25 @@ public with sharing class FlowEmailParser {
     //
     // NB: String.stripHtmlTags() is not used, as it is scheduled for deprecation,
     // doesn't remove all tags, and its implementation isn't open for review.
-    private static String stripHtmlTags(String html) {
+    private String stripHtmlTags(String html) {
         String HTML_TAGS = '<[^<>]+>';
         Pattern pattern = Pattern.compile(HTML_TAGS);
         Matcher matcher = pattern.matcher(html);
         return matcher.replaceAll('');
     }
 
+    // Look for the first occurence of a line starting "Current User:",
+    // with the user id in parens. Once an id is found, ignore all
+    // later lines.
+    private Void extractUserId(String line) {
+        if (!String.isBlank(currentUserId)) { return; }
+
+        String CURRENT_USER_PATTERN = 'Current User:.*[(](.*)[)]';
+        Pattern pattern = Pattern.compile(CURRENT_USER_PATTERN);
+
+        Matcher matcher = pattern.matcher(line);
+        if (matcher.matches()) {
+            currentUserId = matcher.group(1);
+        }
+    }
 }

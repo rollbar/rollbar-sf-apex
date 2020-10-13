@@ -51,6 +51,14 @@ global with sharing class ExceptionData {
         return this.environment;
     }
 
+    global String userId() {
+        if (this.userOrg == null) {
+            return null;
+        }
+
+        return this.userOrg.split('/')[0];
+    }
+
     global static ExceptionData fromMap(Map<String, Object> exData) {
         return new ExceptionData(
             (String)exData.get('environment'),

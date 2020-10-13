@@ -14,6 +14,7 @@ public class ExceptionEmailParserTest {
 
         System.assertEquals(null, exData.environment());
         System.assertEquals('0050R000001t3Br/00D0R000000DUxZ', exData.userOrg());
+        System.assertEquals('0050R000001t3Br', exData.userId());
         System.assertEquals('System.NullPointerException', exData.className());
         System.assertEquals('Attempt to de-reference a null object', exData.message());
         System.assertEquals('Trigger.ContactEx', exData.fileName());
@@ -35,6 +36,7 @@ public class ExceptionEmailParserTest {
 
         System.assertEquals(null, exData.environment());
         System.assertEquals('0050R000001t3Br/00D0R000000DUxZ', exData.userOrg());
+        System.assertEquals('0050R000001t3Br', exData.userId());
         System.assertEquals('System.NullPointerException', exData.className());
         System.assertEquals('Attempt to de-reference a null object', exData.message());
         System.assertEquals('Trigger.ContactEx', exData.fileName());
@@ -56,6 +58,7 @@ public class ExceptionEmailParserTest {
         ExceptionData exData = ExceptionEmailParser.parse(emailBody);
 
         System.assertEquals('0050R000001t3Br/00D0R000000DUxZ', exData.userOrg());
+        System.assertEquals('0050R000001t3Br', exData.userId());
         System.assertEquals('System.DmlException', exData.className());
         System.assertEquals('Delete failed. First exception on row 5 with id b4r2E000001ReGSQB0; first error: ENTITY_IS_DELETED, entity is deleted: []', exData.message());
         System.assertEquals('Source organization: 00D0R000000DUxZ (null)\nFailed to process batch for class \'ccrz.ccProductIndexCleanupJob\' for job id \'8061F00001btixO\'', exData.context());
@@ -70,6 +73,7 @@ public class ExceptionEmailParserTest {
         ExceptionData exData = ExceptionEmailParser.parse(emailBody);
 
         System.assertEquals('0050R000001t3Br/00D0R000000DUxZ', exData.userOrg());
+        System.assertEquals('0050R000001t3Br', exData.userId());
         System.assertEquals('Failed to process batch for class \'G2Crowd.CalculateAccountAveragesBatch\' for job id \'8061F00001btixO\'', exData.context());
     }
 
@@ -81,6 +85,7 @@ public class ExceptionEmailParserTest {
         ExceptionData exData = ExceptionEmailParser.parse(emailBody);
 
         System.assertEquals(null, exData.userOrg());
+        System.assertEquals(null, exData.userId());
         System.assertEquals('Unknown Error', exData.message());
         System.assertEquals('Failed to process batch for class \'G2Crowd.CalculateAccountAveragesBatch\' for job id \'8061F00001btixO\'', exData.context());
     }
