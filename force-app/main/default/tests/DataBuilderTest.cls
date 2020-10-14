@@ -23,9 +23,18 @@ public class DataBuilderTest
          return u;
     }
 
+    static void insertPersonSettings(Boolean captureUserId, Boolean captureUsername, Boolean captureEmail) {
+        insert new RollbarSettings__c(
+            CaptureUserId__c = captureUserId,
+            CaptureUsername__c = captureUsername,
+            CaptureEmail__c = captureEmail
+        );
+    }
+
     @isTest
     static void testBuildMessagePayload()
     {
+        insertPersonSettings(true, true, true);
         DataBuilder subject = new DataBuilder(new Config('foo', 'bar'));
         String expected = 'Message built in DataBuilderTest';
         Item item = new Item(expected);
@@ -59,6 +68,7 @@ public class DataBuilderTest
     @isTest
     static void testBuildMessagePayloadWithTelemetry()
     {
+        insertPersonSettings(true, true, true);
         DataBuilder subject = new DataBuilder(new Config('foo', 'bar'));
 
         List<Telemetry> telemetryList = new List<Telemetry>();
@@ -109,6 +119,48 @@ public class DataBuilderTest
         System.assertEquals(messageBody.get('message'), 'first');
         messageBody = (Map<String, String>)telemetryObjects.get(1).get('body');
         System.assertEquals(messageBody.get('message'), 'second');
+    }
+
+    @isTest
+    static void testBuildWithoutPersonCapture()
+    {
+        insertPersonSettings(false, false, false);
+        DataBuilder subject = new DataBuilder(new Config('foo', 'bar'));
+        String expected = 'Message built in DataBuilderTest';
+        Item item = new Item(expected);
+
+        User testUser = insertUser('test1');
+        Map<String, Object> result;
+
+        System.runAs(testUser) {
+            result = subject.buildPayload('info', item);
+        }
+
+        Map<String, Object> data = (Map<String, Object>)result.get('data');
+        Map<String, Object> person = (Map<String, Object>)data.get('person');
+        System.assertEquals(null, person);
+    }
+
+    @isTest
+    static void testBuildWithPersonIdOnly()
+    {
+        insertPersonSettings(true, false, false);
+        DataBuilder subject = new DataBuilder(new Config('foo', 'bar'));
+        String expected = 'Message built in DataBuilderTest';
+        Item item = new Item(expected);
+
+        User testUser = insertUser('test1');
+        Map<String, Object> result;
+
+        System.runAs(testUser) {
+            result = subject.buildPayload('info', item);
+        }
+
+        Map<String, Object> data = (Map<String, Object>)result.get('data');
+        Map<String, Object> person = (Map<String, Object>)data.get('person');
+        System.assertEquals(testUser.Id, (String)person.get('id'));
+        System.assertEquals(null, (String)person.get('username'));
+        System.assertEquals(null, (String)person.get('email'));
     }
 
     @isTest
@@ -220,6 +272,7 @@ public class DataBuilderTest
     @isTest
     static void testBuildExceptionDataPayload()
     {
+        insertPersonSettings(true, true, true);
         DataBuilder subject = new DataBuilder(new Config('foo', 'bar'));
 
         Map<String, Object> expected = new Map<String, Object>();
@@ -273,6 +326,36 @@ public class DataBuilderTest
         System.assertEquals(expected.get('column'), frameMap.get('colno'));
     }
 
+    @isTest
+    static void testUncaughtWithPersonIdOnly()
+    {
+        insertPersonSettings(true, false, false);
+        DataBuilder subject = new DataBuilder(new Config('foo', 'bar'));
+
+        Map<String, Object> expected = new Map<String, Object>();
+        expected.put('environment', 'Sandbox');
+        expected.put('organization', 'TestOrg');
+        expected.put('className', 'TestClass');
+        expected.put('message', 'Test exception message');
+        expected.put('fileName', 'Class.ClassWithExceptionThrown.someMethod');
+        expected.put('context', 'Exception context');
+        expected.put('line', 14);
+        expected.put('column', 12);
+
+        ExceptionData exData = ExceptionData.fromMap(expected);
+        Item item = new Item(exData);
+        item.isUncaught = true;
+
+        User testUser = insertUser('test4');
+        item.personId = testUser.Id;
+
+        Map<String, Object> result = subject.buildPayload('error', item);
+        Map<String, Object> data = (Map<String, Object>)result.get('data');
+        Map<String, Object> person = (Map<String, Object>)data.get('person');
+        System.assertEquals(testUser.Id, (String)person.get('id'));
+        System.assertEquals(null, (String)person.get('username'));
+        System.assertEquals(null, (String)person.get('email'));
+    }
     @isTest
     static void testBuildEachFrameType()
     {

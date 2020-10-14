@@ -1,6 +1,10 @@
 public with sharing class DataBuilder {
+    private RollbarSettings__c settings { get; set; }
+
     public DataBuilder(Config config) {
         this.config = config;
+
+        this.settings = RollbarSettings__c.getOrgDefaults();
     }
 
     public Map<String, Object> buildPayload(String level, Item item) {
@@ -30,8 +34,9 @@ public with sharing class DataBuilder {
             data.put('custom', item.custom);
         }
 
-        // TODO: if config.personData
-        data.put('person', buildPersonData(item));
+        if (personDataEnabled()) {
+            data.put('person', buildPersonData(item));
+        }
 
         return data;
     }
@@ -225,6 +230,10 @@ public with sharing class DataBuilder {
         return telemetryList;
     }
 
+    private Boolean personDataEnabled() {
+        return settings.CaptureUserId__c || settings.CaptureUsername__c || settings.CaptureEmail__c;
+    }
+
     private Map<String, Object> buildPersonData(Item item) {
         if (item.isUncaught) {
             // The uncaught error handlers won't have anything meaningful at
@@ -238,9 +247,9 @@ public with sharing class DataBuilder {
     private Map<String, Object> buildCurrentPersonData() {
         Map<String, Object> data = new Map<String, Object>();
 
-        data.put('id', UserInfo.getUserId());
-        data.put('username', UserInfo.getUserName());
-        data.put('email', UserInfo.getUserEmail());
+        if (settings.CaptureUserId__c) { data.put('id', UserInfo.getUserId()); }
+        if (settings.CaptureUsername__c) { data.put('username', UserInfo.getUserName()); }
+        if (settings.CaptureEmail__c) { data.put('email', UserInfo.getUserEmail()); }
 
         return data;
     }
@@ -256,9 +265,9 @@ public with sharing class DataBuilder {
                 LIMIT 1
             ];
 
-            data.put('id', personId);
-            data.put('username', u.Username);
-            data.put('email', u.Email);
+            if (settings.CaptureUserId__c) { data.put('id', personId); }
+            if (settings.CaptureUsername__c) { data.put('username', u.Username); }
+            if (settings.CaptureEmail__c) { data.put('email', u.Email); }
         }
 
         return data; // return the map whether filled or empty

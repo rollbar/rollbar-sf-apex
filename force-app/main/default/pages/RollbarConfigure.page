@@ -224,6 +224,18 @@
                                     <span>Send Events To Rollbar</span>
                                 </p>
                                 <p>
+                                    <apex:inputCheckbox value="{!captureUserId}" label="Capture User ID" />
+                                    <span>Capture User ID</span>
+                                </p>
+                                <p>
+                                    <apex:inputCheckbox value="{!captureUsername}" label="Capture Username" />
+                                    <span>Capture Username</span>
+                                </p>
+                                <p>
+                                    <apex:inputCheckbox value="{!captureEmail}" label="Capture User Email" />
+                                    <span>Capture User Email</span>
+                                </p>
+                                <p>
                                     <h4>Environment</h4>
                                     <apex:inputText value="{!environment}" id="rollbarEnvironment" html-placeholder="Rollbar Environment" />
                                 </p>
