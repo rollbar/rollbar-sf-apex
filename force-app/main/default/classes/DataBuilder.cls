@@ -1,116 +1,93 @@
 public with sharing class DataBuilder {
+    private RollbarSettings__c settings { get; set; }
+
     public DataBuilder(Config config) {
         this.config = config;
+
+        this.settings = RollbarSettings__c.getOrgDefaults();
     }
 
-    public Map<String, Object> buildPayload(String level, String message, Map<String, Object> custom, List<Telemetry> telemetry)
-    {
-        return buildPayloadStructure(level, buildMessageBody(message, telemetry), custom);
+    public Map<String, Object> buildPayload(String level, Item item) {
+        Map<String, Object> payload = new Map<String, Object>();
+        Map<String, Object> data = buildData(level, item);
+
+        payload.put('access_token', config.accessToken());
+        payload.put('data', data);
+
+        return payload;
     }
 
-    public Map<String, Object> buildPayload(String level, Exception exc, Map<String, Object> custom)
-    {
-        return buildPayloadStructure(level, buildExceptionBody(exc), custom);
-    }
+    private Map<String, Object> buildData(String level, Item item) {
+        Map<String, Object> notifierMap = new Map<String, Object>();
+        notifierMap.put('name', Notifier.NAME);
+        notifierMap.put('version', Notifier.VERSION);
+        notifierMap.put('diagnostic', item.diagnostic);
 
-    public Map<String, Object> buildPayload(ExceptionData exData)
-    {
-        Map<String, Object> custom = new Map<String, Object>();
-        custom.put('context', exData.context());
+        Map<String, Object> data = new Map<String, Object>();
+        data.put('notifier', notifierMap);
+        data.put('level', level);
+        data.put('environment', item.environment);
+        data.put('framework', 'apex');
+        data.put('body', buildBody(item));
 
-        return buildPayloadStructure('error', buildTraceBody(exData), custom);
-    }
-
-    private Map<String, Object> buildExceptionBody(Exception exc)
-    {
-        if (exc.getCause() == null) {
-            return buildTraceBody(exc);
-        } else {
-            return buildTraceChainBody(exc);
+        if (item.custom != null) {
+            data.put('custom', item.custom);
         }
+
+        if (personDataEnabled()) {
+            data.put('person', buildPersonData(item));
+        }
+
+        return data;
     }
 
-    private Map<String, Object> buildTraceChainBody(Exception exc)
-    {
-        Map<String, Object> outterExTrace = (Map<String, Object>)this.buildTraceBody(exc).get('trace');
-        Map<String, Object> innerExTrace = (Map<String, Object>)this.buildTraceBody(exc.getCause()).get('trace');
+    private Map<String, Object> buildBody(Item item) {
+        Map<String, Object> body;
 
-        List<Map<String, Object>> traceChainList = new List<Map<String, Object>>();
-        traceChainList.add(outterExTrace);
-        traceChainList.add(innerExTrace);
+        switch on item.payloadType {
+            when MESSAGE {
+                body = buildMessageBody(item);
+            }
+            when EXC {
+                body = buildExceptionBody(item);
+            }
+            when EXDATA {
+                body = buildExDataBody(item);
+            }
+        }
 
-
-        Map<String, Object> body = new Map<String, Object>();
-        body.put('trace_chain', traceChainList);
+        if (item.telemetry != null) {
+            body.put('telemetry', buildTelemetry(item));
+        }
 
         return body;
     }
 
-    private Map<String, Object> buildPayloadStructure(
-        String level,
-        Map<String, Object> body,
-        Map<String, Object> custom
-    ) {
-        Map<String, Object> data = this.buildDataStructure(
-            level,
-            this.config.environment(),
-            body,
-            custom
-        );
-
-        Map<String, Object> structure = new Map<String, Object>();
-        structure.put('access_token', this.config.accessToken());
-        structure.put('data', data);
-        return structure;
-    }
-
-    private Map<String, Object> buildDataStructure(
-        String level,
-        String environment,
-        Map<String, Object> body,
-        Map<String, Object> custom
-    ) {
-
-        Map<String, Object> notifierMap = new Map<String, Object>();
-        notifierMap.put('name', Notifier.NAME);
-        notifierMap.put('version', Notifier.VERSION);
-
-        Map<String, Object> structure = new Map<String, Object>();
-        structure.put('notifier', notifierMap);
-        structure.put('level', level);
-        structure.put('environment', environment);
-        structure.put('framework', 'apex');
-        structure.put('body', body);
-
-        if (custom != null) {
-            structure.put('custom', custom);
-        }
-
-        return structure;
-    }
-
-    private Map<String, Object> buildMessageBody(String message, List<Telemetry> telemetry)
-    {
+    private Map<String, Object> buildMessageBody(Item item) {
         Map<String, Object> messageMap = new Map<String, Object>();
-        messageMap.put('body', message);
+        messageMap.put('body', item.message);
 
         Map<String, Object> body = new Map<String, Object>();
         body.put('message', messageMap);
 
-        if (telemetry != null) {
-            List<Object> telemetryList = new List<Object>();
-
-            for (Telemetry t : telemetry) {
-                telemetryList.add(t.toMap());
-            }
-            body.put('telemetry', telemetryList);
-        }
-
         return body;
     }
 
-    private Map<String, Object> buildTraceBody(ExceptionData exData)
-    {
+    private Map<String, Object> buildExceptionBody(Item item) {
+        Exception exc = item.exc;
+
+        if (exc.getCause() == null) {
+            return buildTraceBody(exc);
+        }
+
+        return buildTraceChainBody(exc);
+    }
+
+    private Map<String, Object> buildExDataBody(Item item) {
+        return buildTraceBody(item.exData);
+    }
+
+    private Map<String, Object> buildTraceBody(ExceptionData exData) {
         List<Map<String, Object>> framesList = new List<Map<String, Object>>();
 
         Map<String, Object> frameMap = new Map<String, Object>();
@@ -129,19 +106,35 @@ public with sharing class DataBuilder {
         return buildTraceStructure(excMap, framesList);
     }
 
-    private Map<String, Object> buildTraceBody(Exception exc)
-    {
+    private Map<String, Object> buildTraceChainBody(Exception exc) {
+        Map<String, Object> outterExTrace = (Map<String, Object>)this.buildTraceBody(exc).get('trace');
+        Map<String, Object> innerExTrace = (Map<String, Object>)this.buildTraceBody(exc.getCause()).get('trace');
+
+        List<Map<String, Object>> traceChainList = new List<Map<String, Object>>();
+        traceChainList.add(outterExTrace);
+        traceChainList.add(innerExTrace);
+
+
+        Map<String, Object> body = new Map<String, Object>();
+        body.put('trace_chain', traceChainList);
+
+        return body;
+    }
+
+    private Map<String, Object> buildTraceBody(Exception exc) {
         String stackTraceString = exc.getStackTraceString();
         String typeName = exc.getTypeName();
         String message = exc.getMessage();
 
         return buildTraceBody(stackTraceString, typeName, message);
-
     }
 
     @testVisible
-    private Map<String, Object> buildTraceBody(String stackTraceString, String typeName, String message)
-    {
+    private Map<String, Object> buildTraceBody(
+        String stackTraceString,
+        String typeName,
+        String message
+    ) {
         List<Map<String, Object>> framesList = new List<Map<String, Object>>();
 
         String[] frames = stackTraceString.split('\n');
@@ -225,6 +218,59 @@ public with sharing class DataBuilder {
         body.put('trace', traceMap);
 
         return body;
+    }
+
+    private List<Object> buildTelemetry(Item item) {
+        List<Object> telemetryList = new List<Object>();
+
+        for (Telemetry t : item.telemetry) {
+            telemetryList.add(t.toMap());
+        }
+
+        return telemetryList;
+    }
+
+    private Boolean personDataEnabled() {
+        return settings.CaptureUserId__c || settings.CaptureUsername__c || settings.CaptureEmail__c;
+    }
+
+    private Map<String, Object> buildPersonData(Item item) {
+        if (item.isUncaught) {
+            // The uncaught error handlers won't have anything meaningful at
+            // UserInfo. Use the provided personId instead.
+            return buildPersonDataFromId(item.personId);
+        }
+
+        return buildCurrentPersonData();
+    }
+
+    private Map<String, Object> buildCurrentPersonData() {
+        Map<String, Object> data = new Map<String, Object>();
+
+        if (settings.CaptureUserId__c) { data.put('id', UserInfo.getUserId()); }
+        if (settings.CaptureUsername__c) { data.put('username', UserInfo.getUserName()); }
+        if (settings.CaptureEmail__c) { data.put('email', UserInfo.getUserEmail()); }
+
+        return data;
+    }
+
+    private Map<String, Object> buildPersonDataFromId(String personId) {
+        Map<String, Object> data = new Map<String, Object>();
+
+        if (personId != null) {
+
+            User u = [
+                SELECT Email, Username FROM User
+                WHERE Id = :personId
+                LIMIT 1
+            ];
+
+            if (settings.CaptureUserId__c) { data.put('id', personId); }
+            if (settings.CaptureUsername__c) { data.put('username', u.Username); }
+            if (settings.CaptureEmail__c) { data.put('email', u.Email); }
+        }
+
+        return data; // return the map whether filled or empty
     }
 
     private Config config;

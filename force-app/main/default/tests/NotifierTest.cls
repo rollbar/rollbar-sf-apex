@@ -8,9 +8,10 @@ public class NotifierTest {
         Config config = new Config('foo', 'bar');
 
         Notifier subject = new Notifier(config);
+        Item item = new Item('Message from the Apex SDK');
 
         Test.startTest();
-        HttpResponse response = subject.log('info', 'Message from the Apex SDK', null, null, SendMethod.SYNC);
+        HttpResponse response = subject.log('info', item, SendMethod.SYNC);
         Test.stopTest();
 
         System.assertEquals(200, response.getStatusCode());
@@ -36,11 +37,11 @@ public class NotifierTest {
         Config config = new Config('foo', 'bar');
 
         Notifier subject = new Notifier(config);
-
         DataBuilderTestException exc = new DataBuilderTestException();
+        Item item = new Item(exc);
 
         Test.startTest();
-        HttpResponse response = subject.log('error', exc, null, SendMethod.SYNC);
+        HttpResponse response = subject.log('error', item, SendMethod.SYNC);
         Test.stopTest();
 
         System.assertEquals(200, response.getStatusCode());
@@ -78,9 +79,10 @@ public class NotifierTest {
         expected.put('column', 12);
 
         ExceptionData exData = ExceptionData.fromMap(expected);
+        Item item = new Item(exData);
 
         Test.startTest();
-        HttpResponse response = subject.log(exData, SendMethod.SYNC);
+        HttpResponse response = subject.log('error', item, SendMethod.SYNC);
         Test.stopTest();
 
         System.assertEquals(200, response.getStatusCode());
@@ -106,9 +108,10 @@ public class NotifierTest {
         Config config = new Config('foo', 'bar');
 
         Notifier subject = new Notifier(config);
+        Item item = new Item('Message from the Apex SDK');
 
         Test.startTest();
-        HttpResponse response = subject.log('info', 'Message from the Apex SDK', null, null, SendMethod.SYNC);
+        HttpResponse response = subject.log('info', item, SendMethod.SYNC);
         Test.stopTest();
 
         System.assertEquals(response, null);

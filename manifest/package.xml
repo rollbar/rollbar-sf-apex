@@ -11,6 +11,7 @@
         <members>ExceptionEmailParser</members>
         <members>ExceptionEmailParsingException</members>
         <members>FlowEmailParser</members>
+        <members>Item</members>
         <members>MetadataService</members>
         <members>Notifier</members>
         <members>Rollbar</members>

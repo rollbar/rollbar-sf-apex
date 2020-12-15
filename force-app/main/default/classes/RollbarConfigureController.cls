@@ -6,6 +6,9 @@ public with sharing class RollbarConfigureController {
     public Boolean reportFlowErrors { get; set; }
     public Boolean reportUnknownEmailType { get; set; }
     public Boolean sendReports { get; set; }
+    public Boolean captureUserId { get; set; }
+    public Boolean captureUserName { get; set; }
+    public Boolean captureEmail { get; set; }
     public String environment { get; set; }
     public String accessToken {
         get {
@@ -32,6 +35,9 @@ public with sharing class RollbarConfigureController {
         this.reportUnknownEmailType = this.settings.ReportUnknownEmailType__c;
         this.sendReports = this.settings.SendReports__c;
         this.environment = this.settings.Environment__c;
+        this.captureUserId = this.settings.CaptureUserId__c;
+        this.captureUsername = this.settings.CaptureUsername__c;
+        this.captureEmail = this.settings.CaptureEmail__c;
         updateConfigState();
     }
 
@@ -64,6 +70,9 @@ public with sharing class RollbarConfigureController {
         this.reportFlowErrors = this.settings.ReportFlowErrors__c;
         this.reportUnknownEmailType = this.settings.ReportUnknownEmailType__c;
         this.sendReports = this.settings.SendReports__c;
+        this.captureUserId = this.settings.CaptureUserId__c;
+        this.captureUsername = this.settings.CaptureUsername__c;
+        this.captureEmail = this.settings.CaptureEmail__c;
         this.environment = this.settings.Environment__c;
         updateConfigState();
         return null;
@@ -78,6 +87,9 @@ public with sharing class RollbarConfigureController {
         this.settings.ReportFlowErrors__c = this.reportFlowErrors;
         this.settings.ReportUnknownEmailType__c = this.reportUnknownEmailType;
         this.settings.SendReports__c = this.sendReports;
+        this.settings.CaptureUserId__c = this.captureUserId;
+        this.settings.CaptureUsername__c = this.captureUsername;
+        this.settings.CaptureEmail__c = this.captureEmail;
         this.settings.Environment__c = this.environment;
         upsert this.settings;
 
