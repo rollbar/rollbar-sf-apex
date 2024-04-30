@@ -1,3 +1,8 @@
+## **Attention:**
+
+As of May 2024, Rollbar will not be actively updating this repository and plans to archive it in early 2025. We encourage our community to fork this repo if you wish to continue its development. While Rollbar will no longer be engaging in active development, we remain committed to reviewing and merging pull requests related to security updates. If an actively maintained fork emerges, please reach out to our support team, and we will link to it from our documentation.
+
+
 # Rollbar-SF-APEX
 
 This library detects errors and exceptions in your application and reports them to [Rollbar](https://rollbar.com) for alerts, reporting, and analysis for your SalesForce APEX code.
